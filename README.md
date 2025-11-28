@@ -214,15 +214,6 @@ results = indexer.search(embeddings[0], k=5)
 
 ---
 
-## Future Roadmap
-
-- **Milestone 2**: Stem separation (vocals, drums, bass)
-- **Milestone 3-4**: Augmentation strategies, advanced FAISS indices
-- **Milestone 5**: AI vs human classification
-- **Milestone 6**: Provenance report API
-
----
-
 ## Dependencies
 
 Key packages:
@@ -236,9 +227,6 @@ See `requirements.txt` for complete list.
 
 ---
 
-## License
-
-[Specify license here]
 
 ## Acknowledgments
 
