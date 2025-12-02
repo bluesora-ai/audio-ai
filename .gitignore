@@ -1,0 +1,136 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# C extensions
+*.so
+
+# Distribution / packaging
+.Python
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+.venv/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Installer logs
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Unit test / coverage reports
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# pyenv
+.python-version
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# Pyre type checker
+.pyre/
+
+# Pydantic/fastapi cache
+__pydantic_cache__/
+
+# Environments
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+
+# VS Code
+.vscode/
+.history
+
+# IDEs and editors
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.code-workspace
+
+# MacOS
+.DS_Store
+
+# Windows
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Model/data/output folders
+data/
+models/
+logs/
+output/
+reports/
+checkpoints/
+runs/
+wandb/
+
+# Audio/ML specific
+*.ckpt
+*.pt
+*.pth
+*.onnx
+*.h5
+*.pb
+*.tflite
+
+# Miscellaneous
+*.log
+*.sql
+*.sqlite3
+*.db
+
+# Node/npm (if present for frontend/ui)
+node_modules/
+npm-debug.log
+
+# Temporary files
+*.swp
+*.swo
+*.tmp
+*.bak
+
+# Ignore coverage reports
+coverage/
+
+# Ignore FAISS index files
+*.index
+
+# Ignore result files
+*.jsonl
+*.jsonlines

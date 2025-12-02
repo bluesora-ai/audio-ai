@@ -1,0 +1,44 @@
+# Augmentation configuration for robustness training
+# Used by AudioAugmentation class
+
+lossy_encoding:
+  enabled: true
+  formats: ["mp3", "aac"]
+  bitrates: [128, 64, 32]
+
+resampling:
+  enabled: true
+  rates: [48000, 44100, 22050]
+
+bit_depth:
+  enabled: true
+  depths: [16, 8]
+
+amplitude:
+  enabled: true
+  range_db: [-12, 12]
+
+time_stretch:
+  enabled: true
+  range: [0.85, 1.15]  # ±15% tempo change
+
+pitch_shift:
+  enabled: true
+  range_semitones: [-3, 3]  # ±3 semitones
+
+eq_filtering:
+  enabled: true
+  types: ["hp", "lp", "bp"]  # high-pass, low-pass, band-pass
+
+reverb:
+  enabled: true
+  room_size: [0.1, 0.9]
+
+noise:
+  enabled: true
+  snr_db: [10, 30]  # Signal-to-noise ratio in dB
+
+cropping:
+  enabled: true
+  min_duration: 0.25  # Minimum duration in seconds
+
