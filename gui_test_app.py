@@ -11,9 +11,15 @@ from typing import Optional, Dict
 # Configuration
 VPS_IP = "78.46.37.169"
 BASE_URL = f"http://{VPS_IP}:8000"
-TIMEOUT = 120  # 2 minutes for upload/processing
-CONNECT_TIMEOUT = 10  # 10 seconds for connection
-MAX_WAIT = 600  # 10 minutes for processing completion
+TIMEOUT = 600  # 10 minutes for upload (increased for large files)
+CONNECT_TIMEOUT = 30  # 30 seconds for connection
+MAX_WAIT = 1800  # 30 minutes for processing completion (audio processing can take time)
+
+# Timeout calculation: base timeout + file size factor
+# Formula: base_timeout + (file_size_mb * 30 seconds per MB)
+BASE_UPLOAD_TIMEOUT = 300  # 5 minutes base
+UPLOAD_TIMEOUT_PER_MB = 30  # 30 seconds per MB
+MAX_UPLOAD_TIMEOUT = 1800  # 30 minutes maximum
 
 class ProvenanceTestApp:
     """Desktop GUI for testing Audio Provenance API."""
@@ -191,10 +197,32 @@ class ProvenanceTestApp:
             messagebox.showerror("Error", "Please select a valid audio file")
             return
         
+        # Calculate dynamic timeout based on file size
+        file_path = Path(filename)
+        file_size_mb = file_path.stat().st_size / (1024 * 1024)  # Size in MB
+        dynamic_timeout = min(
+            BASE_UPLOAD_TIMEOUT + (file_size_mb * UPLOAD_TIMEOUT_PER_MB),
+            MAX_UPLOAD_TIMEOUT
+        )
+        
+        # Warn user if file is very large
+        if file_size_mb > 50:
+            proceed = messagebox.askyesno(
+                "Large File Warning",
+                f"File size: {file_size_mb:.1f} MB\n"
+                f"Estimated upload time: {dynamic_timeout // 60} minutes\n\n"
+                f"Large files may take a long time to upload and process.\n"
+                f"Continue?"
+            )
+            if not proceed:
+                return
+        
         def run_upload():
             self.progress.start()
             self.status_var.set("Uploading file...")
             self.log(f"Uploading file: {filename}")
+            self.log(f"File size: {file_size_mb:.2f} MB")
+            self.log(f"Upload timeout: {dynamic_timeout // 60} minutes")
             
             try:
                 url = self.url_var.get()
@@ -203,7 +231,7 @@ class ProvenanceTestApp:
                     response = requests.post(
                         f"{url}/api/v1/provenance-check",
                         files=files,
-                        timeout=TIMEOUT,
+                        timeout=dynamic_timeout,
                         stream=True  # Stream upload for large files
                     )
                 
@@ -224,15 +252,19 @@ class ProvenanceTestApp:
                     self.status_var.set("❌ Upload failed")
                     messagebox.showerror("Error", f"Upload failed: {response.status_code}\n{response.text}")
             except requests.exceptions.Timeout:
-                self.log(f"❌ Upload timeout - File may be too large or server slow")
+                self.log(f"❌ Upload timeout after {dynamic_timeout // 60} minutes")
+                self.log(f"File size: {file_size_mb:.2f} MB")
                 self.status_var.set("❌ Upload Timeout")
                 messagebox.showerror("Timeout", 
-                    "Upload timeout!\n\n"
-                    "Possible causes:\n"
-                    "1. File too large\n"
-                    "2. Slow network connection\n"
-                    "3. Server processing slowly\n\n"
-                    "Try a smaller file or check VPS status")
+                    f"Upload timeout after {dynamic_timeout // 60} minutes!\n\n"
+                    f"File size: {file_size_mb:.2f} MB\n\n"
+                    "Possible solutions:\n"
+                    "1. Try a smaller file (< 50 MB recommended)\n"
+                    "2. Check network connection speed\n"
+                    "3. Verify VPS is running and responsive\n"
+                    "4. Check VPS disk space and resources\n\n"
+                    "You can also try uploading via command line:\n"
+                    f"curl -X POST -F 'file=@{filename}' {url}/api/v1/provenance-check")
             except requests.exceptions.ConnectionError as e:
                 self.log(f"❌ Connection error: {e}")
                 self.status_var.set("❌ Connection Error")
