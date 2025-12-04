@@ -70,12 +70,39 @@ class StemSeparator:
             self.device = device
         
         self.model = None
+        self.underlying_model = None  # Store underlying PyTorch model if Separator wrapper
         self.has_demucs = HAS_DEMUCS
         if HAS_DEMUCS:
             try:
-                self.model = get_model(model_name)
-                self.model.to(self.device)
-                self.model.eval()
+                model_obj = get_model(model_name)
+                
+                # Check if it's a Separator wrapper or raw model
+                if hasattr(model_obj, 'model'):
+                    # It's a Separator wrapper - get underlying model
+                    self.underlying_model = model_obj.model
+                    self.model = model_obj  # Keep wrapper for apply_model if needed
+                elif hasattr(model_obj, 'apply_model'):
+                    # It's a Separator object without .model attribute
+                    self.model = model_obj
+                    # Try to find underlying model in attributes
+                    for attr in ['_model', 'separator', 'net']:
+                        if hasattr(model_obj, attr):
+                            self.underlying_model = getattr(model_obj, attr)
+                            break
+                else:
+                    # Raw PyTorch model
+                    self.underlying_model = model_obj
+                    self.model = model_obj
+                
+                # Move to device and set eval mode
+                if self.underlying_model is not None:
+                    self.underlying_model.to(self.device)
+                    self.underlying_model.eval()
+                elif hasattr(self.model, 'to'):
+                    self.model.to(self.device)
+                if hasattr(self.model, 'eval'):
+                    self.model.eval()
+                
                 logger.info(f"Loaded Demucs model '{model_name}' on {self.device}")
             except Exception as e:
                 logger.warning(f"Failed to load Demucs model: {e}. Using fallback.")
@@ -105,7 +132,7 @@ class StemSeparator:
         
         stem_paths = {}
         
-        if self.has_demucs and self.model is not None and HAS_TORCH:
+        if self.has_demucs and (self.model is not None or self.underlying_model is not None) and HAS_TORCH:
             try:
                 # Load audio
                 import torchaudio
@@ -117,12 +144,17 @@ class StemSeparator:
                     resampler = torchaudio.transforms.Resample(sr, self.sample_rate)
                     wav = resampler(wav)
                 
-                # Add batch dimension
-                wav = wav.unsqueeze(0).to(self.device)
+                # Use underlying model if available, otherwise use wrapper
+                model_to_use = self.underlying_model if self.underlying_model is not None else self.model
                 
-                # Separate
+                # Ensure correct shape: [batch, channels, samples]
+                if len(wav.shape) == 1:
+                    wav = wav.unsqueeze(0)  # Add channel dimension
+                wav = wav.unsqueeze(0).to(self.device)  # Add batch dimension
+                
+                # Separate using the model
                 with torch.no_grad():
-                    sources = self.model(wav)
+                    sources = model_to_use(wav)
                 
                 # Demucs returns: [batch, sources, channels, samples]
                 # Sources order: [drums, bass, other, vocals]
@@ -224,14 +256,25 @@ class StemSeparator:
             resampler = torchaudio.transforms.Resample(sample_rate, self.sample_rate)
             wav = resampler(wav)
         
-        wav = wav.unsqueeze(0).to(self.device)
-        
         stems_dict = {}
         
-        if self.has_demucs and self.model is not None:
+        if self.has_demucs and (self.model is not None or self.underlying_model is not None):
             try:
-                with torch.no_grad():
-                    sources = self.model(wav)
+                # Use underlying model if available, otherwise use wrapper
+                model_to_use = self.underlying_model if self.underlying_model is not None else self.model
+                
+                if model_to_use is None:
+                    # No usable model, use fallback
+                    for stem_type in stems:
+                        stems_dict[stem_type] = segment_audio
+                else:
+                    # Ensure correct shape: [batch, channels, samples]
+                    if len(wav.shape) == 1:
+                        wav = wav.unsqueeze(0)  # Add channel dimension
+                    wav = wav.unsqueeze(0).to(self.device)  # Add batch dimension
+                    
+                    with torch.no_grad():
+                        sources = model_to_use(wav)
                 
                 source_map = {"drums": 0, "bass": 1, "other": 2, "vocals": 3}
                 

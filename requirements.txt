@@ -2,7 +2,7 @@ numpy
 soundfile
 pytest
 faiss-cpu
-openl3
+# openl3
 
 # Milestone 2 additions
 torch>=2.0.0
@@ -17,13 +17,13 @@ librosa>=0.10.0
 scipy>=1.11.0
 pyaudio>=0.2.13
 soxr>=0.3.7
-rubberband-python>=0.3.0
+# rubberband-python>=0.3.0
 soundfile>=0.12.0
 pyyaml>=6.0
 tqdm>=4.66.0
 matplotlib>=3.8.0
 seaborn>=0.13.0
-faiss-gpu>=1.7.4  # Optional, use if GPU available
+# faiss-gpu>=1.7.4  # Optional, use if GPU available
 
 # Music Foundation Models (MERT/MuQ) - Research Paper Requirements
 transformers>=4.30.0  # For MERT/MuQ models

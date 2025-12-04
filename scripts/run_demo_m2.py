@@ -76,20 +76,39 @@ def main():
         logger.info("=" * 60)
         logger.info(f"✓ Report saved to: {report_path}")
         logger.info(f"\nReport Summary:")
-        logger.info(f"  Total segments: {report['summary']['total_segments']}")
-        logger.info(f"  Segments with matches: {report['summary']['segments_with_matches']}")
-        logger.info(f"  Segments flagged as AI: {report['summary']['segments_flagged_ai']}")
-        logger.info(f"  Overall risk level: {report['summary']['risk_level']}")
+        
+        # Use overall_summary instead of summary (new structure)
+        overall = report.get('overall_summary', {})
+        logger.info(f"  Total segments: {overall.get('total_segments', 0)}")
+        logger.info(f"  Segments with matches: {overall.get('segments_with_matches', 0)}")
+        logger.info(f"  Segments flagged as AI: {overall.get('segments_flagged_ai', 0)}")
+        logger.info(f"  Overall risk level: {overall.get('overall_risk', 'unknown')}")
+        logger.info(f"  Verification status: {overall.get('overall_verification_status', 'unknown')}")
+        logger.info(f"  Recommended action: {overall.get('recommended_action', 'unknown')}")
+        logger.info(f"  Overall AI probability: {overall.get('overall_ai_probability', 0.0):.3f}")
         
         # Show sample segment results
-        if report['segments']:
+        if report.get('segments'):
             logger.info(f"\nSample segment results (first 3):")
             for seg in report['segments'][:3]:
-                logger.info(f"  {seg['segment_id']}:")
-                logger.info(f"    Stem: {seg['stem_type']}")
-                logger.info(f"    AI Probability: {seg['classifier']['ai_probability']:.3f}")
-                logger.info(f"    Matches: {seg['match_count']}")
-                logger.info(f"    Risk: {seg['risk_flag']}")
+                logger.info(f"  {seg.get('segment_id', 'unknown')}:")
+                
+                # New structure has stems[] array
+                if 'stems' in seg and len(seg['stems']) > 0:
+                    stem_info = seg['stems'][0]
+                    logger.info(f"    Stem: {stem_info.get('stem_type', 'unknown')}")
+                    classifier = stem_info.get('classifier', {})
+                    logger.info(f"    AI Probability: {classifier.get('ai_probability', 0.0):.3f}")
+                    logger.info(f"    Fusion Score: {stem_info.get('fusion_score', 0.0):.3f}")
+                    logger.info(f"    Consecutive Matches: {stem_info.get('consecutive_matches', 0)}")
+                    logger.info(f"    Final Decision: {stem_info.get('final_decision', 'unknown')}")
+                    logger.info(f"    Matches: {seg.get('match_count', 0)}")
+                    logger.info(f"    Risk: {seg.get('risk_flag', 'unknown')}")
+                else:
+                    # Fallback for old structure
+                    logger.info(f"    Stem: {seg.get('stem_type', 'unknown')}")
+                    logger.info(f"    Matches: {seg.get('match_count', 0)}")
+                    logger.info(f"    Risk: {seg.get('risk_flag', 'unknown')}")
         
     except Exception as e:
         logger.error(f"Error processing file: {e}", exc_info=True)

@@ -429,16 +429,19 @@ class ProvenanceReportBuilder:
             logger.warning("matplotlib not available, skipping spectrogram generation")
             return
         try:
+            # Import librosa at function level to avoid scoping issues
+            import librosa as librosa_module
+            import librosa.display
+            
             audio, sr = sf.read(audio_path)
             
-            # Compute spectrogram
-            D = librosa.stft(audio)
-            S_db = librosa.amplitude_to_db(np.abs(D), ref=np.max)
+            # Compute spectrogram using module-level librosa
+            D = librosa_module.stft(audio)
+            S_db = librosa_module.amplitude_to_db(np.abs(D), ref=np.max)
             
             # Plot
             plt.figure(figsize=(10, 4))
             try:
-                import librosa.display
                 librosa.display.specshow(S_db, sr=sr, x_axis='time', y_axis='hz', cmap='viridis')
             except ImportError:
                 # Fallback if librosa.display not available
