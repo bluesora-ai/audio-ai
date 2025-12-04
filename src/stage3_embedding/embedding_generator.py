@@ -5,17 +5,31 @@ import librosa
 from pathlib import Path
 from typing import List, Dict, Optional
 import logging
-import torch
 
 logger = logging.getLogger(__name__)
 
-# Try to import MERT (Music Foundation Model)
+# Lazy imports for torch to avoid DLL errors on Windows
+HAS_TORCH = False
+HAS_TORCHAUDIO = False
+HAS_TRANSFORMERS = False
+
 try:
-    from transformers import AutoModel, AutoProcessor
-    import torchaudio
-    HAS_TRANSFORMERS = True
-except ImportError:
-    HAS_TRANSFORMERS = False
+    import torch
+    HAS_TORCH = True
+except (ImportError, OSError) as e:
+    logger.warning(f"torch not available: {e}. MERT/MuQ models will not be available.")
+    HAS_TORCH = False
+
+# Try to import MERT (Music Foundation Model) - only if torch is available
+if HAS_TORCH:
+    try:
+        from transformers import AutoModel, AutoProcessor
+        import torchaudio
+        HAS_TORCHAUDIO = True
+        HAS_TRANSFORMERS = True
+    except (ImportError, OSError):
+        HAS_TRANSFORMERS = False
+        HAS_TORCHAUDIO = False
 
 # Try to import openl3, with fallback if not available
 try:
@@ -61,7 +75,11 @@ class EmbeddingGenerator:
         self.input_repr = input_repr
         self.model_type = model_type
         
-        if device is None:
+        if not HAS_TORCH:
+            self.device = "cpu"
+            logger.warning("PyTorch not available. Using CPU fallback and librosa embeddings.")
+        elif device is None:
+            import torch
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
         else:
             self.device = device
@@ -166,8 +184,13 @@ class EmbeddingGenerator:
     
     def _generate_mert_embedding(self, audio: np.ndarray, sr: int) -> np.ndarray:
         """Generate embedding using MERT model."""
+        if not HAS_TORCH:
+            raise ValueError("PyTorch not available. Cannot use MERT model.")
         if self.mert_model is None or self.mert_processor is None:
             raise ValueError("MERT model not loaded")
+        
+        import torch
+        import torchaudio
         
         try:
             # Convert to tensor
@@ -390,6 +413,7 @@ class EmbeddingGenerator:
             
             inputs = {k: v.to(self.device) for k, v in inputs.items()}
             
+            import torch
             with torch.no_grad():
                 outputs = self.mert_model(**inputs)
                 if hasattr(outputs, 'last_hidden_state'):

@@ -1,7 +1,4 @@
 """Contrastive learning trainer for embedding model with hard negative mining."""
-import torch
-import torch.nn as nn
-import torch.optim as optim
 import numpy as np
 from typing import List, Dict, Optional, Tuple
 from pathlib import Path
@@ -10,8 +7,24 @@ from tqdm import tqdm
 
 logger = logging.getLogger(__name__)
 
+# Lazy imports for torch to avoid DLL errors on Windows
+HAS_TORCH = False
+try:
+    import torch
+    import torch.nn as nn
+    import torch.optim as optim
+    HAS_TORCH = True
+except (ImportError, OSError) as e:
+    logger.warning(f"torch not available: {e}. ContrastiveTrainer will not be available.")
+    HAS_TORCH = False
+    # Create dummy classes to prevent import errors
+    class nn:
+        Module = object
+    class optim:
+        Adam = object
 
-class ContrastiveLoss(nn.Module):
+
+class ContrastiveLoss:
     """InfoNCE contrastive loss."""
     
     def __init__(self, temperature: float = 0.07):
@@ -21,10 +34,12 @@ class ContrastiveLoss(nn.Module):
         Args:
             temperature: Temperature parameter for softmax
         """
-        super().__init__()
+        if not HAS_TORCH:
+            raise RuntimeError("PyTorch not available. ContrastiveLoss requires PyTorch.")
+        import torch.nn as nn
         self.temperature = temperature
     
-    def forward(self, anchor: torch.Tensor, positive: torch.Tensor, negatives: torch.Tensor) -> torch.Tensor:
+    def forward(self, anchor, positive, negatives):
         """
         Compute InfoNCE loss.
         

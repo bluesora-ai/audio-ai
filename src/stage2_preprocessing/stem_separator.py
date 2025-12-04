@@ -1,6 +1,4 @@
 """Stem separation module using Demucs for Milestone 2."""
-import torch
-import torchaudio
 import numpy as np
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -9,14 +7,32 @@ import soundfile as sf
 
 logger = logging.getLogger(__name__)
 
-# Try to import demucs
+# Lazy imports for torch to avoid DLL errors on Windows
+HAS_TORCH = False
+HAS_TORCHAUDIO = False
+HAS_DEMUCS = False
+
 try:
-    import demucs.separate
-    from demucs.pretrained import get_model
-    HAS_DEMUCS = True
-except ImportError:
+    import torch
+    import torchaudio
+    HAS_TORCH = True
+    HAS_TORCHAUDIO = True
+except (ImportError, OSError) as e:
+    logger.warning(f"torch/torchaudio not available: {e}. Stem separation will use fallback.")
+    HAS_TORCH = False
+    HAS_TORCHAUDIO = False
+
+# Try to import demucs (only if torch is available)
+if HAS_TORCH:
+    try:
+        import demucs.separate
+        from demucs.pretrained import get_model
+        HAS_DEMUCS = True
+    except ImportError:
+        HAS_DEMUCS = False
+        logger.warning("demucs not installed. Stem separation will use fallback.")
+else:
     HAS_DEMUCS = False
-    logger.warning("demucs not installed. Stem separation will use fallback.")
 
 
 class StemSeparator:
@@ -40,6 +56,13 @@ class StemSeparator:
         """
         self.model_name = model_name
         self.sample_rate = sample_rate
+        
+        if not HAS_TORCH:
+            logger.warning("PyTorch not available. Stem separation will use fallback.")
+            self.device = "cpu"
+            self.model = None
+            self.has_demucs = False
+            return
         
         if device is None:
             self.device = "cuda" if torch.cuda.is_available() else "cpu"
@@ -82,9 +105,10 @@ class StemSeparator:
         
         stem_paths = {}
         
-        if self.has_demucs and self.model is not None:
+        if self.has_demucs and self.model is not None and HAS_TORCH:
             try:
                 # Load audio
+                import torchaudio
                 wav, sr = torchaudio.load(str(input_path))
                 wav = wav.mean(dim=0)  # Convert to mono if stereo
                 
@@ -181,7 +205,16 @@ class StemSeparator:
         if stems is None:
             stems = self.STEM_TYPES
         
+        if not HAS_TORCH:
+            # Fallback: return same audio for all stems
+            stems_dict = {}
+            for stem_type in stems:
+                stems_dict[stem_type] = segment_audio
+            return stems_dict
+        
         # Convert to tensor
+        import torch
+        import torchaudio
         wav = torch.from_numpy(segment_audio).float()
         if len(wav.shape) == 1:
             wav = wav.unsqueeze(0)
