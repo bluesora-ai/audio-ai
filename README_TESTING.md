@@ -1,90 +1,126 @@
-# Testing & Deployment Quick Reference
+# Testing Tools - Quick Reference
 
-## 🏠 Local Testing (Before Deployment)
+## Files
 
-### Quick Test
+- **`test_vps_complete.py`** - Complete automated test suite
+- **`inspect_report.py`** - Inspect and validate provenance reports
+- **`test_remote.py`** - Basic remote API testing
+- **`LOCAL_VERIFICATION_GUIDE.md`** - Complete verification guide
+
+## Quick Start
+
+### 1. Install Dependencies
 
 ```bash
-# 1. Activate venv
-cd "D:\work folder\kevino\audio-ai"
-venv\Scripts\activate
-
-# 2. Test everything
-python test_local.py
-
-# OR manually:
-python scripts/create_test_audio.py
-python scripts/milestone1_demo.py
-uvicorn api.main:app --host 127.0.0.1 --port 8000
+pip install requests
 ```
 
-**Expected:** All tests pass, files generated, API responds
+### 2. Run Complete Test
+
+```bash
+python test_vps_complete.py test_audio.wav
+```
+
+### 3. Inspect Report
+
+```bash
+python inspect_report.py test_reports/report_*.json
+```
+
+## What Each Tool Does
+
+### `test_vps_complete.py`
+
+**Purpose:** Complete end-to-end testing of VPS deployment
+
+**Usage:**
+```bash
+python test_vps_complete.py <audio_file.wav>
+```
+
+**Tests:**
+1. Health endpoint
+2. API information
+3. File upload
+4. Processing status
+5. Report download
+6. Report structure validation
+
+**Output:**
+- Test results with ✅/❌ indicators
+- Downloaded reports in `test_reports/`
+- Detailed summary
+
+### `inspect_report.py`
+
+**Purpose:** Inspect and validate provenance report structure
+
+**Usage:**
+```bash
+python inspect_report.py <report.json>
+```
+
+**Shows:**
+- Basic information
+- Summary statistics
+- Segment analysis
+- Model provenance
+- Index provenance
+- Evidence files
+- Structure validation
+
+### `test_remote.py`
+
+**Purpose:** Basic remote API testing
+
+**Usage:**
+```bash
+python test_remote.py <audio_file.wav>
+```
+
+**Tests:**
+- Basic connectivity
+- File upload
+- Status checking
+- Report download
 
 ---
 
-## 🖥️ Deploy to Ubuntu VPS
+## Verification Checklist
 
-### One-Command Setup
+Use this checklist to verify all requirements:
 
-```bash
-# On VPS:
-cd ~/audio-ai
-chmod +x setup_vps.sh
-./setup_vps.sh
-```
-
-### Manual Setup
-
-```bash
-cd ~/audio-ai
-source venv/bin/activate
-pip install numpy soundfile faiss-cpu torch torchaudio demucs fastapi uvicorn[standard] pydantic scikit-learn librosa scipy transformers accelerate
-mkdir -p data/{raw,derived/segments,embeddings,indexes,reports,uploads} models logs
-python3 scripts/create_test_audio.py
-uvicorn api.main:app --host 0.0.0.0 --port 8000
-```
-
----
-
-## 🌐 Test from Local Machine
-
-### Quick Test
-
-```bash
-# Health check
-curl http://your-vps-ip:8000/health
-
-# Upload file
-curl -X POST "http://your-vps-ip:8000/api/v1/provenance-check" -F "file=@test.wav"
-
-# Get report (replace JOB_ID)
-curl http://your-vps-ip:8000/api/v1/reports/JOB_ID > report.json
-```
-
-### Automated Test
-
-```bash
-# Edit test_remote.py - set VPS_IP
-python test_remote.py test_audio.wav
-```
-
-### Browser Test
-
-Open: `http://your-vps-ip:8000/docs`
-
----
-
-## ✅ Success Checklist
-
-- [ ] Local tests pass
-- [ ] Project uploaded to VPS
-- [ ] Packages installed on VPS
-- [ ] API server running
-- [ ] Can connect from local
+- [ ] Health endpoint responds
 - [ ] File upload works
-- [ ] Reports generated
+- [ ] Processing completes
+- [ ] Report downloads successfully
+- [ ] Report has all required fields
+- [ ] Per-segment analysis present
+- [ ] AI probabilities included
+- [ ] Similarity matches found
+- [ ] Model provenance included
+- [ ] Index provenance included
+- [ ] Evidence paths included
 
 ---
 
-**See COMPLETE_DEPLOYMENT_GUIDE.md for detailed instructions!**
+## Troubleshooting
 
+**Connection refused:**
+- Check VPS is running
+- Check firewall allows port 8000
+- Verify API server is started
+
+**Processing timeout:**
+- Increase `MAX_WAIT` in test script
+- Check VPS resources
+- Check VPS logs
+
+**Report missing fields:**
+- Check VPS logs for errors
+- Verify pipeline completed
+- Check report structure
+
+---
+
+**For detailed instructions, see `LOCAL_VERIFICATION_GUIDE.md`**

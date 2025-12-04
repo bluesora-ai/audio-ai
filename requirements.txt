@@ -11,6 +11,7 @@ demucs>=4.0.0
 fastapi>=0.104.0
 uvicorn[standard]>=0.24.0
 pydantic>=2.0.0
+python-multipart>=0.0.6  # Required for FastAPI file uploads
 scikit-learn>=1.3.0
 librosa>=0.10.0
 scipy>=1.11.0
@@ -27,3 +28,6 @@ faiss-gpu>=1.7.4  # Optional, use if GPU available
 # Music Foundation Models (MERT/MuQ) - Research Paper Requirements
 transformers>=4.30.0  # For MERT/MuQ models
 accelerate>=0.20.0  # For model acceleration
+
+# Testing dependencies (for local verification)
+requests>=2.31.0

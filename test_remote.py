@@ -6,7 +6,7 @@ import json
 from pathlib import Path
 
 # Configuration
-VPS_IP = "your-vps-ip"  # Replace with your VPS IP address
+VPS_IP = "78.46.37.169"  # Your VPS IP address
 BASE_URL = f"http://{VPS_IP}:8000"
 TIMEOUT = 10
 
