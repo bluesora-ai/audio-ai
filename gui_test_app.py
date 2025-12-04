@@ -11,8 +11,9 @@ from typing import Optional, Dict
 # Configuration
 VPS_IP = "78.46.37.169"
 BASE_URL = f"http://{VPS_IP}:8000"
-TIMEOUT = 30
-MAX_WAIT = 300  # 5 minutes
+TIMEOUT = 120  # 2 minutes for upload/processing
+CONNECT_TIMEOUT = 10  # 10 seconds for connection
+MAX_WAIT = 600  # 10 minutes for processing completion
 
 class ProvenanceTestApp:
     """Desktop GUI for testing Audio Provenance API."""
@@ -143,7 +144,7 @@ class ProvenanceTestApp:
             
             try:
                 url = self.url_var.get()
-                response = requests.get(f"{url}/health", timeout=TIMEOUT)
+                response = requests.get(f"{url}/health", timeout=CONNECT_TIMEOUT)
                 
                 if response.status_code == 200:
                     data = response.json()
@@ -154,10 +155,30 @@ class ProvenanceTestApp:
                     self.log(f"❌ Health check failed: {response.status_code}")
                     self.status_var.set("❌ Health check failed")
                     messagebox.showerror("Error", f"Health check failed: {response.status_code}")
+            except requests.exceptions.Timeout:
+                self.log(f"❌ Connection timeout - Server not responding")
+                self.status_var.set("❌ Timeout")
+                messagebox.showerror("Timeout", 
+                    "Connection timeout!\n\n"
+                    "Possible causes:\n"
+                    "1. API server not running on VPS\n"
+                    "2. Firewall blocking connection\n"
+                    "3. Network issues\n\n"
+                    "Run: python test_connection.py to diagnose")
+            except requests.exceptions.ConnectionError as e:
+                self.log(f"❌ Connection error: {e}")
+                self.status_var.set("❌ Connection Error")
+                messagebox.showerror("Connection Error", 
+                    f"Cannot connect to VPS!\n\n{e}\n\n"
+                    "Check:\n"
+                    "1. VPS is running\n"
+                    "2. API server is started\n"
+                    "3. Firewall allows port 8000\n\n"
+                    "Run: python test_connection.py to diagnose")
             except Exception as e:
                 self.log(f"❌ Error: {e}")
                 self.status_var.set("❌ Error")
-                messagebox.showerror("Error", f"Connection error: {e}")
+                messagebox.showerror("Error", f"Error: {e}")
             finally:
                 self.progress.stop()
         
@@ -182,7 +203,8 @@ class ProvenanceTestApp:
                     response = requests.post(
                         f"{url}/api/v1/provenance-check",
                         files=files,
-                        timeout=TIMEOUT
+                        timeout=TIMEOUT,
+                        stream=True  # Stream upload for large files
                     )
                 
                 if response.status_code == 200:
@@ -201,6 +223,20 @@ class ProvenanceTestApp:
                     self.log(f"Response: {response.text}")
                     self.status_var.set("❌ Upload failed")
                     messagebox.showerror("Error", f"Upload failed: {response.status_code}\n{response.text}")
+            except requests.exceptions.Timeout:
+                self.log(f"❌ Upload timeout - File may be too large or server slow")
+                self.status_var.set("❌ Upload Timeout")
+                messagebox.showerror("Timeout", 
+                    "Upload timeout!\n\n"
+                    "Possible causes:\n"
+                    "1. File too large\n"
+                    "2. Slow network connection\n"
+                    "3. Server processing slowly\n\n"
+                    "Try a smaller file or check VPS status")
+            except requests.exceptions.ConnectionError as e:
+                self.log(f"❌ Connection error: {e}")
+                self.status_var.set("❌ Connection Error")
+                messagebox.showerror("Connection Error", f"Cannot connect: {e}")
             except Exception as e:
                 self.log(f"❌ Error: {e}")
                 self.status_var.set("❌ Error")
@@ -277,7 +313,7 @@ class ProvenanceTestApp:
                 url = self.url_var.get()
                 response = requests.get(
                     f"{url}/api/v1/status/{self.job_id}",
-                    timeout=TIMEOUT
+                    timeout=CONNECT_TIMEOUT
                 )
                 
                 if response.status_code == 200:
@@ -323,7 +359,7 @@ class ProvenanceTestApp:
                 url = self.url_var.get()
                 response = requests.get(
                     f"{url}/api/v1/reports/{self.job_id}",
-                    timeout=TIMEOUT
+                    timeout=TIMEOUT  # Reports can be large
                 )
                 
                 if response.status_code == 200:

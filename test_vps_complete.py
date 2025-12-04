@@ -10,8 +10,9 @@ import hashlib
 # Configuration
 VPS_IP = "78.46.37.169"  # Your VPS IP
 BASE_URL = f"http://{VPS_IP}:8000"
-TIMEOUT = 30
-MAX_WAIT = 300  # 5 minutes max wait for processing
+TIMEOUT = 120  # 2 minutes for upload/processing
+CONNECT_TIMEOUT = 10  # 10 seconds for connection
+MAX_WAIT = 600  # 10 minutes max wait for processing
 
 class Colors:
     GREEN = '\033[92m'
@@ -41,7 +42,7 @@ def test_health():
     """Test 1: Health endpoint."""
     print_header("TEST 1: Health Check")
     try:
-        response = requests.get(f"{BASE_URL}/health", timeout=TIMEOUT)
+        response = requests.get(f"{BASE_URL}/health", timeout=CONNECT_TIMEOUT)
         if response.status_code == 200:
             data = response.json()
             print_success("Health check passed")
@@ -65,7 +66,7 @@ def test_api_info():
     
     # Root endpoint
     try:
-        response = requests.get(BASE_URL, timeout=TIMEOUT)
+        response = requests.get(BASE_URL, timeout=CONNECT_TIMEOUT)
         if response.status_code == 200:
             data = response.json()
             print_success("Root endpoint OK")
@@ -81,7 +82,7 @@ def test_api_info():
     
     # Docs endpoint
     try:
-        response = requests.get(f"{BASE_URL}/docs", timeout=TIMEOUT)
+        response = requests.get(f"{BASE_URL}/docs", timeout=CONNECT_TIMEOUT)
         if response.status_code == 200:
             print_success("API documentation available")
             print_info(f"Open in browser: {BASE_URL}/docs")
@@ -114,7 +115,8 @@ def upload_audio(audio_file: Path) -> Optional[str]:
             response = requests.post(
                 f"{BASE_URL}/api/v1/provenance-check",
                 files=files,
-                timeout=TIMEOUT
+                timeout=TIMEOUT,
+                stream=True  # Stream upload for large files
             )
         
         if response.status_code == 200:
@@ -146,7 +148,7 @@ def wait_for_completion(job_id: str) -> bool:
         try:
             response = requests.get(
                 f"{BASE_URL}/api/v1/status/{job_id}",
-                timeout=TIMEOUT
+                timeout=CONNECT_TIMEOUT
             )
             
             if response.status_code == 200:
@@ -187,7 +189,7 @@ def download_and_verify_report(job_id: str) -> Optional[Dict]:
     try:
         response = requests.get(
             f"{BASE_URL}/api/v1/reports/{job_id}",
-            timeout=TIMEOUT
+            timeout=TIMEOUT  # Reports can be large
         )
         
         if response.status_code == 200:
