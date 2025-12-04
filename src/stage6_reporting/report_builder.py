@@ -8,18 +8,22 @@ import logging
 import numpy as np
 import soundfile as sf
 import librosa
+import subprocess
+import sys
+
+# Initialize logger first
+logger = logging.getLogger(__name__)
+
+# Try to import matplotlib (handle PIL/Pillow conflicts)
+HAS_MATPLOTLIB = False
 try:
     import matplotlib
     matplotlib.use('Agg')  # Non-interactive backend
     import matplotlib.pyplot as plt
     HAS_MATPLOTLIB = True
-except ImportError:
+except (ImportError, OSError, AttributeError) as e:
     HAS_MATPLOTLIB = False
-    logger.warning("matplotlib not available. Spectrograms will not be generated.")
-import subprocess
-import sys
-
-logger = logging.getLogger(__name__)
+    logger.warning(f"matplotlib not available: {e}. Spectrograms will not be generated.")
 
 
 class ProvenanceReportBuilder:
