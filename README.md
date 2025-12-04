@@ -1,4 +1,23 @@
-# Audio Provenance System - Milestone 2
+# Audio Provenance System - Complete Implementation
+
+## 🚀 Quick Start - Run & Test
+
+**Want to deploy and test?** See these guides:
+
+- **[QUICK_START.md](QUICK_START.md)** ⚡ - Fastest way to get started (3 steps)
+- **[COMPLETE_RUN_GUIDE.md](COMPLETE_RUN_GUIDE.md)** 📖 - Complete deployment & testing guide
+- **[VISUAL_TESTING_GUIDE.md](VISUAL_TESTING_GUIDE.md)** 🎨 - GUI app visual testing
+
+**Quick Commands:**
+```bash
+# Deploy to VPS
+cd ~/audio-ai && source venv/bin/activate && uvicorn api.main:app --host 0.0.0.0 --port 8000
+
+# Test with GUI (on local machine)
+python gui_test_app.py
+```
+
+---
 
 A robust per-stem audio provenance system that detects AI-generated content and identifies reused samples through neural fingerprinting and similarity search.
 

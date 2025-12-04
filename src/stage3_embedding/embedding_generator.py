@@ -138,11 +138,19 @@ class EmbeddingGenerator:
             for model_name in model_names:
                 try:
                     logger.info(f"Attempting to load MERT model: {model_name}")
-                    self.mert_model = AutoModel.from_pretrained(model_name)
-                    self.mert_processor = AutoProcessor.from_pretrained(model_name)
+                    self.mert_model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
+                    self.mert_processor = AutoProcessor.from_pretrained(model_name, trust_remote_code=True)
                     self.mert_model.to(self.device)
                     self.mert_model.eval()
                     self.active_model = "mert"
+                    
+                    # Log MERT's required sampling rate
+                    mert_sr = getattr(self.mert_processor, 'sampling_rate', None)
+                    if hasattr(self.mert_processor, 'feature_extractor'):
+                        mert_sr = getattr(self.mert_processor.feature_extractor, 'sampling_rate', None)
+                    if mert_sr:
+                        logger.info(f"MERT model requires sampling rate: {mert_sr} Hz")
+                    
                     logger.info(f"Successfully loaded MERT model: {model_name}")
                     return True
                 except Exception as e:
@@ -193,27 +201,39 @@ class EmbeddingGenerator:
         import torchaudio
         
         try:
+            # Get MERT processor's required sampling rate (usually 24000)
+            mert_sr = getattr(self.mert_processor, 'sampling_rate', 24000)
+            if hasattr(self.mert_processor, 'feature_extractor'):
+                mert_sr = getattr(self.mert_processor.feature_extractor, 'sampling_rate', 24000)
+            
+            logger.debug(f"MERT requires sampling rate: {mert_sr} Hz (input: {sr} Hz)")
+            
             # Convert to tensor
             if isinstance(audio, np.ndarray):
                 audio_tensor = torch.from_numpy(audio).float()
             else:
                 audio_tensor = audio
             
-            # Resample if needed
-            if sr != self.sample_rate:
-                resampler = torchaudio.transforms.Resample(sr, self.sample_rate)
-                audio_tensor = resampler(audio_tensor)
-            
-            # Process with MERT
-            # MERT processor expects raw_speech as positional argument
-            # Convert to numpy array (1D)
+            # Ensure 1D
             if len(audio_tensor.shape) > 1:
                 audio_tensor = audio_tensor.squeeze()
+            
+            # Resample to MERT's required sampling rate (24000 Hz)
+            # NOTE: This resampling is INTERNAL ONLY for MERT processing.
+            # The pipeline operates at 44.1 kHz throughout. This resampling
+            # is transparent - embeddings still represent the original 44.1 kHz audio.
+            if sr != mert_sr:
+                resampler = torchaudio.transforms.Resample(sr, mert_sr)
+                audio_tensor = resampler(audio_tensor)
+                logger.debug(f"Resampled from {sr} Hz to {mert_sr} Hz (internal MERT processing only)")
+            
+            # Convert to numpy array (1D)
             audio_numpy = audio_tensor.numpy()
             
+            # Process with MERT - use MERT's sampling rate, not our default
             inputs = self.mert_processor(
                 raw_speech=audio_numpy,
-                sampling_rate=self.sample_rate,
+                sampling_rate=mert_sr,  # Use MERT's required sampling rate
                 return_tensors="pt"
             )
             
@@ -392,11 +412,27 @@ class EmbeddingGenerator:
     
     def _generate_mert_batch(self, audio_paths: List[Path]) -> List[np.ndarray]:
         """Generate MERT embeddings in batch."""
-        # Load all audio files
+        # Get MERT processor's required sampling rate (usually 24000)
+        mert_sr = getattr(self.mert_processor, 'sampling_rate', 24000)
+        if hasattr(self.mert_processor, 'feature_extractor'):
+            mert_sr = getattr(self.mert_processor.feature_extractor, 'sampling_rate', 24000)
+        
+        logger.debug(f"MERT batch processing with sampling rate: {mert_sr} Hz")
+        
+        # Load all audio files and resample to MERT's required rate
         audio_list = []
         for path in audio_paths:
-            y, sr = librosa.load(path, sr=self.sample_rate, mono=True)
-            target_length = int(self.sample_rate * 0.5)
+            y, sr = librosa.load(path, sr=None, mono=True)  # Load at original rate first
+            
+            # Resample to MERT's required sampling rate
+            # NOTE: This resampling is INTERNAL ONLY for MERT processing.
+            # The pipeline operates at 44.1 kHz throughout. This resampling
+            # is transparent - embeddings still represent the original 44.1 kHz audio.
+            if sr != mert_sr:
+                y = librosa.resample(y, orig_sr=sr, target_sr=mert_sr)
+            
+            # Pad or crop to target length (0.5 seconds at MERT's rate)
+            target_length = int(mert_sr * 0.5)
             if len(y) < target_length:
                 y = np.pad(y, (0, target_length - len(y)), mode='constant')
             elif len(y) > target_length:
@@ -408,11 +444,10 @@ class EmbeddingGenerator:
             # Convert to list of numpy arrays for MERT processor
             audio_numpy_list = [audio for audio in audio_list]
             
-            # Process with MERT
-            # MERT processor expects raw_speech as positional argument
+            # Process with MERT - use MERT's sampling rate
             inputs = self.mert_processor(
                 raw_speech=audio_numpy_list,
-                sampling_rate=self.sample_rate,
+                sampling_rate=mert_sr,  # Use MERT's required sampling rate
                 return_tensors="pt"
             )
             

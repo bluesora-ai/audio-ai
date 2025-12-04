@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import json
 import logging
+from datetime import datetime
 
 logger = logging.getLogger(__name__)
 
@@ -45,6 +46,14 @@ class FAISSIndexer:
             quantizer = faiss.IndexFlatL2(self.embedding_dim)
             self.index = faiss.IndexIVFFlat(quantizer, self.embedding_dim, nlist)
             logger.info(f"Created IVF index with dim={self.embedding_dim}, nlist={nlist}")
+        elif index_type == "ivfpq":
+            # IVF + Product Quantization for production scale
+            nlist = kwargs.get("nlist", 4096)
+            pq_m = kwargs.get("pq_m", 64)  # Number of subquantizers
+            nbits = kwargs.get("nbits", 8)  # Bits per subquantizer
+            quantizer = faiss.IndexFlatL2(self.embedding_dim)
+            self.index = faiss.IndexIVFPQ(quantizer, self.embedding_dim, nlist, pq_m, nbits)
+            logger.info(f"Created IVF+PQ index with dim={self.embedding_dim}, nlist={nlist}, PQ_m={pq_m}, nbits={nbits}")
         else:
             raise ValueError(f"Unknown index type: {index_type}")
     
@@ -86,6 +95,16 @@ class FAISSIndexer:
                 f"for {len(embeddings)} embeddings"
             )
         
+        # For IVF and IVF+PQ indices, need to train quantizer first
+        if hasattr(self.index, 'is_trained') and not self.index.is_trained:
+            logger.info("Training quantizer for IVF/IVF+PQ index...")
+            # Need at least nlist samples to train
+            min_train_samples = min(len(embeddings), self.index.nlist * 39)  # FAISS requirement
+            if len(embeddings) >= min_train_samples:
+                self.index.train(embeddings[:min_train_samples])
+            else:
+                logger.warning(f"Not enough samples to train quantizer. Need at least {min_train_samples}, got {len(embeddings)}")
+        
         # Add to index
         self.index.add(embeddings)
         
@@ -98,7 +117,8 @@ class FAISSIndexer:
         self,
         query_embedding: np.ndarray,
         k: int = 10,
-        threshold: Optional[float] = None
+        threshold: Optional[float] = None,
+        nprobe: Optional[int] = None
     ) -> List[Dict]:
         """
         Search for similar embeddings.
@@ -107,6 +127,7 @@ class FAISSIndexer:
             query_embedding: query vector (embedding_dim,) or (1, embedding_dim)
             k: number of results to return
             threshold: optional similarity threshold (0-1), filters results
+            nprobe: number of clusters to probe (for IVF/IVF+PQ indices)
         
         Returns:
             List of match dictionaries with keys:
@@ -135,6 +156,13 @@ class FAISSIndexer:
                 f"got {query_embedding.shape[1]}"
             )
         
+        # Set nprobe for IVF indices
+        if hasattr(self.index, 'nprobe') and nprobe is not None:
+            self.index.nprobe = nprobe
+        elif hasattr(self.index, 'nprobe') and self.index.nprobe == 1:
+            # Set default nprobe if not set
+            self.index.nprobe = min(8, self.index.nlist // 4) if hasattr(self.index, 'nlist') else 8
+        
         # Search
         k = min(k, self.index.ntotal)  # Don't search for more than available
         distances, indices = self.index.search(query_embedding, k)
@@ -159,13 +187,19 @@ class FAISSIndexer:
         
         return results
     
-    def save_index(self, index_path: Path, metadata_path: Path):
+    def save_index(
+        self,
+        index_path: Path,
+        metadata_path: Path,
+        config_path: Optional[Path] = None
+    ):
         """
-        Save index and metadata to disk.
+        Save index, metadata, and config to disk.
         
         Args:
             index_path: Path to save FAISS index
             metadata_path: Path to save metadata JSON
+            config_path: Path to save index config JSON (optional)
         """
         if self.index is None:
             raise ValueError("No index to save")
@@ -176,6 +210,28 @@ class FAISSIndexer:
         # Save metadata
         with open(metadata_path, "w") as f:
             json.dump(self.metadata, f, indent=2)
+        
+        # Save index config
+        if config_path:
+            config = {
+                "embedding_dim": self.embedding_dim,
+                "total_vectors": self.index.ntotal,
+                "index_type": str(type(self.index).__name__),
+                "created_at": datetime.utcnow().isoformat()
+            }
+            
+            # Add index-specific parameters
+            if hasattr(self.index, 'nlist'):
+                config["nlist"] = self.index.nlist
+            if hasattr(self.index, 'nprobe'):
+                config["nprobe"] = self.index.nprobe
+            if hasattr(self.index, 'pq'):
+                config["pq_m"] = self.index.pq.M
+                config["pq_nbits"] = self.index.pq.nbits
+            
+            with open(config_path, "w") as f:
+                json.dump(config, f, indent=2)
+            logger.info(f"Saved index config to {config_path}")
         
         logger.info(f"Saved index to {index_path}, metadata to {metadata_path}")
     
@@ -210,8 +266,21 @@ class FAISSIndexer:
                 "index_type": "None"
             }
         
-        return {
+        index_type_name = str(type(self.index).__name__)
+        
+        stats = {
             "total_vectors": self.index.ntotal,
             "embedding_dim": self.embedding_dim,
-            "index_type": "IndexFlatL2"
+            "index_type": index_type_name
         }
+        
+        # Add index-specific stats
+        if hasattr(self.index, 'nlist'):
+            stats["nlist"] = self.index.nlist
+        if hasattr(self.index, 'nprobe'):
+            stats["nprobe"] = self.index.nprobe
+        if hasattr(self.index, 'pq'):
+            stats["pq_m"] = self.index.pq.M
+            stats["pq_nbits"] = self.index.pq.nbits
+        
+        return stats

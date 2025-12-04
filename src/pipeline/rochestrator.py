@@ -11,6 +11,7 @@ from src.stage3_embedding import EmbeddingGenerator
 from src.stage4_indexing import FAISSIndexer
 from src.stage5_classifier import AIDetector
 from src.stage6_reporting import ProvenanceReportBuilder
+from src.utils.performance_tracker import PerformanceTracker
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -84,6 +85,9 @@ class PipelineOrchestrator:
             model_hash=model_hash,
             index_hash=index_hash
         )
+        
+        # Performance tracker
+        self.performance_tracker = PerformanceTracker()
     
     def process_file(
         self,
@@ -102,6 +106,11 @@ class PipelineOrchestrator:
         Returns:
             Complete provenance report dictionary
         """
+        import time
+        
+        # Start performance tracking
+        self.performance_tracker.start()
+        
         logger.info(f"Processing file: {input_path}")
         
         if output_dir is None:
@@ -113,11 +122,22 @@ class PipelineOrchestrator:
         
         file_id = input_path.stem
         
+        # Set processing start time for report builder
+        self.report_builder.processing_start_time = datetime.utcnow()
+        
         # Step 1: Segment audio
         logger.info("Step 1: Segmenting audio...")
+        seg_start = time.time()
         segments_dir = output_dir / "segments"
         segments = self.segmenter.segment_file(input_path, segments_dir)
+        seg_duration = time.time() - seg_start
+        self.performance_tracker.record_stage("segmentation", seg_duration)
         logger.info(f"Created {len(segments)} segments")
+        
+        # Get file duration
+        import soundfile as sf
+        audio_info = sf.info(input_path)
+        duration_sec = audio_info.duration
         
         # Step 2: Process each segment with stem separation
         logger.info("Step 2: Separating stems and generating embeddings...")
@@ -125,6 +145,10 @@ class PipelineOrchestrator:
         all_embeddings = []
         matches = {}  # segment_id -> list of matches
         classifier_scores = {}  # segment_id -> {stem_type: prob}
+        consecutive_matches = {}  # segment_id -> consecutive match count
+        
+        # Track consecutive matches by source file
+        source_match_tracker = {}  # source_file_id -> [list of consecutive segment_ids]
         
         for seg in segments:
             segment_id = seg["segment_id"]
@@ -147,13 +171,30 @@ class PipelineOrchestrator:
                 sf.write(str(stem_seg_path), stem_audio, self.sample_rate)
                 
                 # Generate embedding for stem
+                emb_start = time.time()
                 emb = self.embedder.generate_embedding(stem_seg_path)
+                emb_duration = time.time() - emb_start
+                self.performance_tracker.record_embedding_time(emb_duration)
                 
                 # Search for matches
+                search_start = time.time()
                 search_results = self.indexer.search(emb, k=10, threshold=0.7)
+                search_duration = time.time() - search_start
+                self.performance_tracker.record_search_time(search_duration)
                 matches[f"{segment_id}_{stem_type}"] = search_results
                 
+                # Track consecutive matches for fusion formula
+                if search_results:
+                    top_match = search_results[0]
+                    source_file = top_match.get("file_id")
+                    if source_file:
+                        # Initialize tracker for this source if needed
+                        if source_file not in source_match_tracker:
+                            source_match_tracker[source_file] = []
+                        source_match_tracker[source_file].append(segment_id)
+                
                 # Classify (if classifier available)
+                class_start = time.time()
                 if stem_type in self.classifiers:
                     _, prob = self.classifiers[stem_type].predict(emb, return_proba=True)
                     if segment_id not in classifier_scores:
@@ -164,6 +205,8 @@ class PipelineOrchestrator:
                     if segment_id not in classifier_scores:
                         classifier_scores[segment_id] = {}
                     classifier_scores[segment_id][stem_type] = 0.5
+                class_duration = time.time() - class_start
+                self.performance_tracker.record_classification_time(class_duration)
                 
                 # Store metadata
                 stem_seg_meta = seg.copy()
@@ -172,6 +215,49 @@ class PipelineOrchestrator:
                 stem_seg_meta["path"] = str(stem_seg_path)
                 all_segment_metadata.append(stem_seg_meta)
                 all_embeddings.append(emb)
+        
+        # Calculate consecutive matches for each segment
+        # Count how many consecutive segments match the same source
+        for source_file, matched_segments in source_match_tracker.items():
+            # Sort segments by index to find consecutive sequences
+            seg_indices = {}
+            for seg in segments:
+                seg_indices[seg["segment_id"]] = seg.get("index", 0)
+            
+            # Find consecutive sequences
+            matched_segments_sorted = sorted(
+                matched_segments,
+                key=lambda sid: seg_indices.get(sid, 0)
+            )
+            
+            current_sequence = []
+            for seg_id in matched_segments_sorted:
+                if not current_sequence:
+                    current_sequence = [seg_id]
+                else:
+                    # Check if this segment is consecutive to the last one
+                    last_idx = seg_indices.get(current_sequence[-1], 0)
+                    curr_idx = seg_indices.get(seg_id, 0)
+                    if curr_idx == last_idx + 1:
+                        current_sequence.append(seg_id)
+                    else:
+                        # End of sequence, update consecutive counts
+                        n_cons = len(current_sequence)
+                        for seq_seg_id in current_sequence:
+                            consecutive_matches[seq_seg_id] = max(
+                                consecutive_matches.get(seq_seg_id, 0),
+                                n_cons
+                            )
+                        current_sequence = [seg_id]
+            
+            # Handle last sequence
+            if current_sequence:
+                n_cons = len(current_sequence)
+                for seq_seg_id in current_sequence:
+                    consecutive_matches[seq_seg_id] = max(
+                        consecutive_matches.get(seq_seg_id, 0),
+                        n_cons
+                    )
         
         # Step 3: Build provenance report
         logger.info("Step 3: Building provenance report...")
@@ -199,6 +285,10 @@ class PipelineOrchestrator:
             report_seg["all_stem_scores"] = seg_scores
             report_segments.append(report_seg)
         
+        # Get model and index info
+        model_info = self.embedder.get_model_info() if hasattr(self.embedder, 'get_model_info') else {}
+        index_stats = self.indexer.get_stats() if hasattr(self.indexer, 'get_stats') else {}
+        
         # Build report
         report = self.report_builder.build_report(
             file_id=file_id,
@@ -206,13 +296,38 @@ class PipelineOrchestrator:
             matches={seg["segment_id"]: matches.get(f"{seg['segment_id']}_{seg.get('stem_type', 'mix')}", []) 
                     for seg in report_segments},
             classifier_scores=classifier_scores,
+            consecutive_matches=consecutive_matches,
+            original_file_path=input_path,
+            output_dir=output_dir,
             metadata={
                 "input_file": str(input_path),
+                "original_filename": input_path.name,
+                "duration_sec": duration_sec,
                 "processing_timestamp": datetime.utcnow().isoformat(),
-                "stems_processed": stems_to_process
+                "stems_processed": stems_to_process,
+                "model_type": model_info.get("active_model", "unknown"),
+                "index_type": index_stats.get("index_type", "unknown"),
+                "index_size": index_stats.get("total_vectors", 0),
+                "augmentation_profile": "default"
             }
         )
         
-        logger.info(f"Completed processing. Report summary: {report['summary']}")
+        # End performance tracking
+        self.performance_tracker.end()
+        
+        # Generate performance report
+        perf_report_path = output_dir / "perf_report.json"
+        try:
+            perf_report = self.performance_tracker.generate_report(
+                perf_report_path,
+                target_latency=1.0,
+                target_throughput=10.0,
+                target_embedding_ms=50.0
+            )
+            logger.info(f"Performance report saved to {perf_report_path}")
+        except Exception as e:
+            logger.warning(f"Failed to generate performance report: {e}")
+        
+        logger.info(f"Completed processing. Report summary: {report.get('overall_summary', {})}")
         return report
 

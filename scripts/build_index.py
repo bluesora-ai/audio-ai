@@ -68,26 +68,21 @@ def load_embeddings_from_directory(embeddings_dir: Path) -> tuple:
 def create_index(
     indexer: FAISSIndexer,
     index_type: str,
-    num_vectors: int
+    num_vectors: int,
+    nlist: int = 4096,
+    pq_m: int = 64,
+    nbits: int = 8
 ):
     """Create FAISS index of specified type."""
-    import faiss
-    
     if index_type == "flat":
-        indexer.create_index()
+        indexer.create_index("flat")
     elif index_type == "hnsw":
-        # HNSW index for approximate search
-        index = faiss.IndexHNSWFlat(EMBEDDING_DIM, FAISS_HNSW_M)
-        index.hnsw.efConstruction = FAISS_HNSW_EF_CONSTRUCTION
-        indexer.index = index
-        logger.info(f"Created HNSW index with M={FAISS_HNSW_M}, efConstruction={FAISS_HNSW_EF_CONSTRUCTION}")
+        indexer.create_index("hnsw", m=FAISS_HNSW_M, ef_construction=FAISS_HNSW_EF_CONSTRUCTION)
     elif index_type == "ivf":
-        # IVF index for large-scale search
-        nlist = min(100, num_vectors // 10)  # Number of clusters
-        quantizer = faiss.IndexFlatL2(EMBEDDING_DIM)
-        index = faiss.IndexIVFFlat(quantizer, EMBEDDING_DIM, nlist)
-        indexer.index = index
-        logger.info(f"Created IVF index with nlist={nlist}")
+        indexer.create_index("ivf", nlist=nlist)
+    elif index_type == "ivfpq":
+        indexer.create_index("ivfpq", nlist=nlist, pq_m=pq_m, nbits=nbits)
+        logger.info(f"Created IVF+PQ index with nlist={nlist}, PQ_m={pq_m}, nbits={nbits}")
     else:
         raise ValueError(f"Unknown index type: {index_type}")
 
@@ -97,7 +92,11 @@ def main():
     parser.add_argument("--embeddings_dir", type=str, required=True, help="Directory containing .npy embedding files")
     parser.add_argument("--index_path", type=str, default=None, help="Output path for index")
     parser.add_argument("--metadata_path", type=str, default=None, help="Output path for metadata")
-    parser.add_argument("--index_type", type=str, default=FAISS_INDEX_TYPE, choices=["flat", "hnsw", "ivf"], help="Index type")
+    parser.add_argument("--index_type", type=str, default=FAISS_INDEX_TYPE, choices=["flat", "hnsw", "ivf", "ivfpq"], help="Index type")
+    parser.add_argument("--nlist", type=int, default=4096, help="Number of clusters for IVF/IVF+PQ (default: 4096)")
+    parser.add_argument("--pq_m", type=int, default=64, help="Number of subquantizers for IVF+PQ (default: 64)")
+    parser.add_argument("--nbits", type=int, default=8, help="Bits per subquantizer for IVF+PQ (default: 8)")
+    parser.add_argument("--nprobe", type=int, default=8, help="Number of clusters to probe for IVF/IVF+PQ (default: 8)")
     
     args = parser.parse_args()
     
@@ -121,28 +120,28 @@ def main():
     
     # Create index
     logger.info(f"Creating {args.index_type} index...")
-    create_index(indexer, args.index_type, len(embeddings))
+    create_index(
+        indexer,
+        args.index_type,
+        len(embeddings),
+        nlist=args.nlist,
+        pq_m=args.pq_m,
+        nbits=args.nbits
+    )
     
     # Add embeddings
     logger.info("Adding embeddings to index...")
     indexer.add_embeddings(embeddings, metadata)
     
-    # Save index
+    # Set nprobe for IVF indices
+    if args.index_type in ["ivf", "ivfpq"] and hasattr(indexer.index, 'nprobe'):
+        indexer.index.nprobe = args.nprobe
+        logger.info(f"Set nprobe={args.nprobe} for {args.index_type} index")
+    
+    # Save index with config
     logger.info(f"Saving index to {index_path}...")
-    indexer.save_index(index_path, metadata_path)
-    
-    # Save index config
-    config = {
-        "index_type": args.index_type,
-        "embedding_dim": EMBEDDING_DIM,
-        "num_vectors": len(embeddings),
-        "index_path": str(index_path),
-        "metadata_path": str(metadata_path)
-    }
-    
     config_path = index_path.parent / "index_config.json"
-    with open(config_path, 'w') as f:
-        json.dump(config, f, indent=2)
+    indexer.save_index(index_path, metadata_path, config_path)
     
     logger.info(f"Index built successfully!")
     logger.info(f"  Type: {args.index_type}")
