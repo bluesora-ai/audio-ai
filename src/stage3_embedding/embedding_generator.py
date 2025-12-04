@@ -205,10 +205,14 @@ class EmbeddingGenerator:
                 audio_tensor = resampler(audio_tensor)
             
             # Process with MERT
-            # Convert to list for processor (MERT processor expects list)
-            audio_list = [audio_tensor.numpy()]
+            # MERT processor expects raw_speech as positional argument
+            # Convert to numpy array (1D)
+            if len(audio_tensor.shape) > 1:
+                audio_tensor = audio_tensor.squeeze()
+            audio_numpy = audio_tensor.numpy()
+            
             inputs = self.mert_processor(
-                audio=audio_list,
+                raw_speech=audio_numpy,
                 sampling_rate=self.sample_rate,
                 return_tensors="pt"
             )
@@ -405,8 +409,9 @@ class EmbeddingGenerator:
             audio_numpy_list = [audio for audio in audio_list]
             
             # Process with MERT
+            # MERT processor expects raw_speech as positional argument
             inputs = self.mert_processor(
-                audio=audio_numpy_list,
+                raw_speech=audio_numpy_list,
                 sampling_rate=self.sample_rate,
                 return_tensors="pt"
             )

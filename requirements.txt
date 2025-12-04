@@ -31,3 +31,5 @@ accelerate>=0.20.0  # For model acceleration
 
 # Testing dependencies (for local verification)
 requests>=2.31.0
+
+# GUI dependencies (tkinter is built-in with Python, no install needed)
