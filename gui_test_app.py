@@ -438,15 +438,24 @@ class ProvenanceTestApp:
         self.report_text.insert(tk.END, f"File ID: {self.report.get('file_id', 'N/A')}\n")
         self.report_text.insert(tk.END, f"Timestamp: {self.report.get('timestamp', 'N/A')}\n\n")
         
-        # Summary
-        summary = self.report.get('summary', {})
+        # Summary - use overall_summary (new structure)
+        overall = self.report.get('overall_summary', {})
+        # Fallback to old 'summary' for compatibility
+        summary = overall if overall else self.report.get('summary', {})
+        
         self.report_text.insert(tk.END, "=== SUMMARY ===\n")
         self.report_text.insert(tk.END, f"Total Segments: {summary.get('total_segments', 0)}\n")
-        self.report_text.insert(tk.END, f"Risk Level: {summary.get('risk_level', 'N/A')}\n")
-        self.report_text.insert(tk.END, f"AI Probability: {summary.get('ai_probability', 0):.3f}\n")
-        self.report_text.insert(tk.END, f"Human Probability: {summary.get('human_probability', 0):.3f}\n\n")
+        self.report_text.insert(tk.END, f"Risk Level: {summary.get('overall_risk', summary.get('risk_level', 'N/A'))}\n")
+        self.report_text.insert(tk.END, f"Verification Status: {summary.get('overall_verification_status', 'N/A')}\n")
+        ai_prob = summary.get('overall_ai_probability', summary.get('ai_probability', 0))
+        self.report_text.insert(tk.END, f"AI Probability: {ai_prob:.3f}\n")
+        human_prob = 1.0 - ai_prob
+        self.report_text.insert(tk.END, f"Human Probability: {human_prob:.3f}\n")
+        self.report_text.insert(tk.END, f"Recommended Action: {summary.get('recommended_action', 'N/A')}\n")
+        self.report_text.insert(tk.END, f"Segments Flagged: {summary.get('segments_flagged_ai', 0)}\n")
+        self.report_text.insert(tk.END, f"Segments with Matches: {summary.get('segments_with_matches', 0)}\n\n")
         
-        # Segments
+        # Segments - new structure has stems[] array
         segments = self.report.get('segments', [])
         if segments:
             self.report_text.insert(tk.END, "=== SEGMENTS (First 5) ===\n")
@@ -454,17 +463,66 @@ class ProvenanceTestApp:
                 self.report_text.insert(tk.END, f"\nSegment {i}:\n")
                 self.report_text.insert(tk.END, f"  ID: {seg.get('segment_id', 'N/A')}\n")
                 self.report_text.insert(tk.END, f"  Time: {seg.get('start', 0):.2f}s - {seg.get('end', 0):.2f}s\n")
-                self.report_text.insert(tk.END, f"  AI Prob: {seg.get('ai_probability', 0):.3f}\n")
                 
-                matches = seg.get('matches', [])
-                if matches:
-                    self.report_text.insert(tk.END, f"  Top Match: {matches[0].get('similarity', 0):.3f}\n")
+                # New structure: stems[] array
+                stems = seg.get('stems', [])
+                if stems:
+                    # Get first stem (usually vocals or primary stem)
+                    stem_info = stems[0]
+                    stem_type = stem_info.get('stem_type', 'unknown')
+                    classifier = stem_info.get('classifier', {})
+                    ai_prob = classifier.get('ai_probability', 0.0)
+                    fusion_score = stem_info.get('fusion_score', 0.0)
+                    final_decision = stem_info.get('final_decision', 'unknown')
+                    confidence = stem_info.get('confidence_bucket', 'unknown')
+                    consecutive = stem_info.get('consecutive_matches', 0)
+                    
+                    self.report_text.insert(tk.END, f"  Stem: {stem_type}\n")
+                    self.report_text.insert(tk.END, f"  AI Prob: {ai_prob:.3f}\n")
+                    self.report_text.insert(tk.END, f"  Fusion Score: {fusion_score:.3f}\n")
+                    self.report_text.insert(tk.END, f"  Decision: {final_decision}\n")
+                    self.report_text.insert(tk.END, f"  Confidence: {confidence}\n")
+                    self.report_text.insert(tk.END, f"  Consecutive Matches: {consecutive}\n")
+                    
+                    # Matches are in stems[0]['matches']
+                    matches = stem_info.get('matches', [])
+                    if matches:
+                        top_match = matches[0]
+                        self.report_text.insert(tk.END, f"  Top Match Similarity: {top_match.get('similarity', 0):.3f}\n")
+                        self.report_text.insert(tk.END, f"  Top Match Source: {top_match.get('source_file_id', 'N/A')}\n")
+                    else:
+                        self.report_text.insert(tk.END, f"  Matches: 0\n")
+                    
+                    # Risk flag from segment level
+                    risk_flag = seg.get('risk_flag', 'unknown')
+                    self.report_text.insert(tk.END, f"  Risk Flag: {risk_flag}\n")
+                else:
+                    # Fallback for old structure
+                    self.report_text.insert(tk.END, f"  AI Prob: {seg.get('ai_probability', 0):.3f}\n")
+                    matches = seg.get('matches', [])
+                    if matches:
+                        self.report_text.insert(tk.END, f"  Top Match: {matches[0].get('similarity', 0):.3f}\n")
         
         # Model provenance
         model_prov = self.report.get('model_provenance', {})
         self.report_text.insert(tk.END, "\n=== MODEL PROVENANCE ===\n")
         self.report_text.insert(tk.END, f"Model: {model_prov.get('model_name', 'N/A')}\n")
-        self.report_text.insert(tk.END, f"Version: {model_prov.get('model_version', 'N/A')}\n")
+        self.report_text.insert(tk.END, f"Version: {model_prov.get('model_version', self.report.get('pipeline_version', 'N/A'))}\n")
+        
+        # Pipeline version (new field)
+        if self.report.get('pipeline_version'):
+            self.report_text.insert(tk.END, f"Pipeline Version: {self.report.get('pipeline_version')}\n")
+        
+        # Stems summary (if available)
+        stems_summary = self.report.get('stems_summary', [])
+        if stems_summary:
+            self.report_text.insert(tk.END, "\n=== STEMS SUMMARY ===\n")
+            for stem_summary in stems_summary:
+                stem_type = stem_summary.get('stem_type', 'unknown')
+                ai_score = stem_summary.get('aggregated_ai_score', 0.0)
+                matches = stem_summary.get('matches_found', 0)
+                risk = stem_summary.get('risk_flags', 'unknown')
+                self.report_text.insert(tk.END, f"{stem_type.capitalize()}: AI={ai_score:.3f}, Matches={matches}, Risk={risk}\n")
 
 
 def main():
