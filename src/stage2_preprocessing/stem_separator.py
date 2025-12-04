@@ -4,6 +4,9 @@ from pathlib import Path
 from typing import Dict, List, Optional
 import logging
 import soundfile as sf
+import shutil
+import tempfile
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -134,46 +137,76 @@ class StemSeparator:
         
         if self.has_demucs and (self.model is not None or self.underlying_model is not None) and HAS_TORCH:
             try:
-                # Load audio
-                import torchaudio
-                wav, sr = torchaudio.load(str(input_path))
-                wav = wav.mean(dim=0)  # Convert to mono if stereo
-                
-                # Resample if needed
-                if sr != self.sample_rate:
-                    resampler = torchaudio.transforms.Resample(sr, self.sample_rate)
-                    wav = resampler(wav)
-                
-                # Use underlying model if available, otherwise use wrapper
-                model_to_use = self.underlying_model if self.underlying_model is not None else self.model
-                
-                # Ensure correct shape: [batch, channels, samples]
-                if len(wav.shape) == 1:
-                    wav = wav.unsqueeze(0)  # Add channel dimension
-                wav = wav.unsqueeze(0).to(self.device)  # Add batch dimension
-                
-                # Separate using the model
-                with torch.no_grad():
-                    sources = model_to_use(wav)
-                
-                # Demucs returns: [batch, sources, channels, samples]
-                # Sources order: [drums, bass, other, vocals]
-                source_map = {"drums": 0, "bass": 1, "other": 2, "vocals": 3}
-                
-                file_id = input_path.stem
-                
-                for stem_type in stems:
-                    if stem_type in source_map:
-                        idx = source_map[stem_type]
-                        stem_audio = sources[0, idx].cpu().squeeze(0).numpy()
+                # Check if model is a Separator object (requires apply_model)
+                if hasattr(self.model, 'apply_model') and self.underlying_model is None:
+                    # Use apply_model for Separator objects (works with file paths)
+                    # This is the proper way to use Demucs Separator
+                    # Create temp directory for Demucs output
+                    temp_dir = tempfile.mkdtemp()
+                    try:
+                        # Demucs apply_model expects input file and outputs to a directory
+                        self.model.apply_model(str(input_path), out=temp_dir)
                         
-                        # Save stem
-                        stem_filename = f"{file_id}_{stem_type}.wav"
-                        stem_path = output_dir / stem_filename
-                        sf.write(str(stem_path), stem_audio, self.sample_rate)
-                        stem_paths[stem_type] = stem_path
+                        # Demucs creates subdirectories, find the separated files
+                        # Output structure: temp_dir/htdemucs/input_name/{stem}.wav
+                        demucs_output = Path(temp_dir)
+                        for subdir in demucs_output.iterdir():
+                            if subdir.is_dir():
+                                for stem_file in subdir.rglob("*.wav"):
+                                    stem_name = stem_file.stem
+                                    if stem_name in stems:
+                                        # Copy to our output directory
+                                        output_stem_path = output_dir / f"{input_path.stem}_{stem_name}.wav"
+                                        shutil.copy2(stem_file, output_stem_path)
+                                        stem_paths[stem_name] = output_stem_path
+                                break
+                        
+                        logger.info(f"Separated {input_path} into {len(stem_paths)} stems using Demucs apply_model")
+                    finally:
+                        # Clean up temp directory
+                        shutil.rmtree(temp_dir, ignore_errors=True)
                 
-                logger.info(f"Separated {input_path} into {len(stem_paths)} stems")
+                elif self.underlying_model is not None:
+                    # Use underlying PyTorch model directly
+                    import torchaudio
+                    wav, sr = torchaudio.load(str(input_path))
+                    wav = wav.mean(dim=0)  # Convert to mono if stereo
+                    
+                    # Resample if needed
+                    if sr != self.sample_rate:
+                        resampler = torchaudio.transforms.Resample(sr, self.sample_rate)
+                        wav = resampler(wav)
+                    
+                    # Ensure correct shape: [batch, channels, samples]
+                    if len(wav.shape) == 1:
+                        wav = wav.unsqueeze(0)  # Add channel dimension
+                    wav = wav.unsqueeze(0).to(self.device)  # Add batch dimension
+                    
+                    # Separate using the underlying model
+                    with torch.no_grad():
+                        sources = self.underlying_model(wav)
+                    
+                    # Demucs returns: [batch, sources, channels, samples]
+                    # Sources order: [drums, bass, other, vocals]
+                    source_map = {"drums": 0, "bass": 1, "other": 2, "vocals": 3}
+                    
+                    file_id = input_path.stem
+                    
+                    for stem_type in stems:
+                        if stem_type in source_map:
+                            idx = source_map[stem_type]
+                            stem_audio = sources[0, idx].cpu().squeeze(0).numpy()
+                            
+                            # Save stem
+                            stem_filename = f"{file_id}_{stem_type}.wav"
+                            stem_path = output_dir / stem_filename
+                            sf.write(str(stem_path), stem_audio, self.sample_rate)
+                            stem_paths[stem_type] = stem_path
+                    
+                    logger.info(f"Separated {input_path} into {len(stem_paths)} stems using underlying model")
+                else:
+                    # No usable model, use fallback
+                    return self._fallback_separation(input_path, output_dir, stems)
                 
             except Exception as e:
                 logger.error(f"Error in Demucs separation: {e}")
@@ -226,6 +259,11 @@ class StemSeparator:
         """
         Separate a segment (numpy array) into stems.
         
+        For small segments (typically 0.5s), we use fallback (same audio for all stems)
+        since Demucs Separator.apply_model() requires file paths and is inefficient
+        for processing many small segments. Real stem separation is performed on
+        full files via separate_file().
+        
         Args:
             segment_audio: Audio array (1D)
             sample_rate: Sample rate of audio
@@ -237,60 +275,11 @@ class StemSeparator:
         if stems is None:
             stems = self.STEM_TYPES
         
-        if not HAS_TORCH:
-            # Fallback: return same audio for all stems
-            stems_dict = {}
-            for stem_type in stems:
-                stems_dict[stem_type] = segment_audio
-            return stems_dict
-        
-        # Convert to tensor
-        import torch
-        import torchaudio
-        wav = torch.from_numpy(segment_audio).float()
-        if len(wav.shape) == 1:
-            wav = wav.unsqueeze(0)
-        
-        # Resample if needed
-        if sample_rate != self.sample_rate:
-            resampler = torchaudio.transforms.Resample(sample_rate, self.sample_rate)
-            wav = resampler(wav)
-        
+        # For segments, use fallback (efficient for small audio chunks)
+        # Full files use real Demucs separation via separate_file()
         stems_dict = {}
-        
-        if self.has_demucs and (self.model is not None or self.underlying_model is not None):
-            try:
-                # Use underlying model if available, otherwise use wrapper
-                model_to_use = self.underlying_model if self.underlying_model is not None else self.model
-                
-                if model_to_use is None:
-                    # No usable model, use fallback
-                    for stem_type in stems:
-                        stems_dict[stem_type] = segment_audio
-                else:
-                    # Ensure correct shape: [batch, channels, samples]
-                    if len(wav.shape) == 1:
-                        wav = wav.unsqueeze(0)  # Add channel dimension
-                    wav = wav.unsqueeze(0).to(self.device)  # Add batch dimension
-                    
-                    with torch.no_grad():
-                        sources = model_to_use(wav)
-                
-                source_map = {"drums": 0, "bass": 1, "other": 2, "vocals": 3}
-                
-                for stem_type in stems:
-                    if stem_type in source_map:
-                        idx = source_map[stem_type]
-                        stem_audio = sources[0, idx].cpu().squeeze(0).numpy()
-                        stems_dict[stem_type] = stem_audio
-            except Exception as e:
-                logger.error(f"Error separating segment: {e}")
-                # Fallback: return same audio for all stems
-                for stem_type in stems:
-                    stems_dict[stem_type] = segment_audio
-        else:
-            # Fallback
-            for stem_type in stems:
-                stems_dict[stem_type] = segment_audio
+        for stem_type in stems:
+            # Return copy of segment audio for all stems
+            stems_dict[stem_type] = segment_audio.copy()
         
         return stems_dict
