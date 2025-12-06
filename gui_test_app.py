@@ -64,7 +64,12 @@ class CustomAlert:
         # Create top-level window
         self.dialog = tk.Toplevel(parent)
         self.dialog.title(title)
-        self.dialog.geometry("450x200")
+        
+        # Calculate approximate height based on message length
+        # Base height: title bar (50) + padding (40) + button (50) + message area
+        message_lines = max(3, len(message) // 60)  # Estimate lines needed
+        estimated_height = max(280, 50 + 40 + 50 + (message_lines * 25))
+        self.dialog.geometry(f"450x{estimated_height}")
         self.dialog.resizable(False, False)
         self.dialog.configure(bg=COLOR_BG_DARK)
         
@@ -75,8 +80,8 @@ class CustomAlert:
         # Center dialog on parent window
         self.dialog.update_idletasks()
         x = parent.winfo_x() + (parent.winfo_width() // 2) - (450 // 2)
-        y = parent.winfo_y() + (parent.winfo_height() // 2) - (200 // 2)
-        self.dialog.geometry(f"450x200+{x}+{y}")
+        y = parent.winfo_y() + (parent.winfo_height() // 2) - (estimated_height // 2)
+        self.dialog.geometry(f"450x{estimated_height}+{x}+{y}")
         
         # Remove default window decorations for custom look
         self.dialog.overrideredirect(False)
@@ -120,38 +125,46 @@ class CustomAlert:
         title_label.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
         # Close button
-        close_btn = tk.Button(
-            title_frame,
-            text="×",
-            command=self.dialog.destroy,
-            bg=COLOR_BG_CARD,
-            fg=COLOR_TEXT_SECONDARY,
-            font=('Segoe UI', 18, 'bold'),
-            relief=tk.FLAT,
-            bd=0,
-            padx=15,
-            pady=0,
-            cursor='hand2',
-            activebackground=COLOR_ERROR,
-            activeforeground=COLOR_TEXT_PRIMARY
-        )
-        close_btn.pack(side=tk.RIGHT)
+        # close_btn = tk.Button(
+        #     title_frame,
+        #     text="×",
+        #     command=self.dialog.destroy,
+        #     bg=COLOR_BG_CARD,
+        #     fg=COLOR_TEXT_SECONDARY,
+        #     font=('Segoe UI', 18, 'bold'),
+        #     relief=tk.FLAT,
+        #     bd=0,
+        #     padx=15,
+        #     pady=0,
+        #     cursor='hand2',
+        #     activebackground=COLOR_ERROR,
+        #     activeforeground=COLOR_TEXT_PRIMARY
+        # )
+        # close_btn.pack(side=tk.RIGHT)
         
         # Content area
         content_frame = tk.Frame(container, bg=COLOR_BG_DARK)
         content_frame.pack(fill=tk.BOTH, expand=True, padx=25, pady=20)
         
-        # Message text
-        message_label = tk.Label(
+        # Message text - use Text widget for better multi-line support
+        message_text = tk.Text(
             content_frame,
-            text=message,
             bg=COLOR_BG_DARK,
             fg=COLOR_TEXT_PRIMARY,
             font=('Segoe UI', 11),
-            justify=tk.LEFT,
-            wraplength=400
+            wrap=tk.WORD,
+            width=45,
+            height=max(3, message.count('\n') + 1),
+            relief=tk.FLAT,
+            bd=0,
+            padx=0,
+            pady=0,
+            highlightthickness=0,
+            insertwidth=0
         )
-        message_label.pack(anchor=tk.W, pady=(0, 20))
+        message_text.insert('1.0', message)
+        message_text.config(state=tk.DISABLED)
+        message_text.pack(anchor=tk.W, fill=tk.BOTH, expand=True, pady=(0, 20))
         
         # Button frame
         btn_frame = tk.Frame(content_frame, bg=COLOR_BG_DARK)
@@ -199,7 +212,11 @@ class CustomConfirm:
         # Create top-level window
         self.dialog = tk.Toplevel(parent)
         self.dialog.title(title)
-        self.dialog.geometry("450x200")
+        
+        # Calculate approximate height based on message length
+        message_lines = max(3, len(message) // 60)  # Estimate lines needed
+        estimated_height = max(280, 50 + 40 + 50 + (message_lines * 25))
+        self.dialog.geometry(f"450x{estimated_height}")
         self.dialog.resizable(False, False)
         self.dialog.configure(bg=COLOR_BG_DARK)
         
@@ -210,8 +227,8 @@ class CustomConfirm:
         # Center dialog
         self.dialog.update_idletasks()
         x = parent.winfo_x() + (parent.winfo_width() // 2) - (450 // 2)
-        y = parent.winfo_y() + (parent.winfo_height() // 2) - (200 // 2)
-        self.dialog.geometry(f"450x200+{x}+{y}")
+        y = parent.winfo_y() + (parent.winfo_height() // 2) - (estimated_height // 2)
+        self.dialog.geometry(f"450x{estimated_height}+{x}+{y}")
         
         # Main container
         container = tk.Frame(self.dialog, bg=COLOR_BG_DARK)
@@ -240,36 +257,31 @@ class CustomConfirm:
         )
         title_label.pack(side=tk.LEFT, fill=tk.X, expand=True)
         
-        close_btn = tk.Button(
-            title_frame,
-            text="×",
-            command=self.dialog.destroy,
-            bg=COLOR_BG_CARD,
-            fg=COLOR_TEXT_SECONDARY,
-            font=('Segoe UI', 18, 'bold'),
-            relief=tk.FLAT,
-            bd=0,
-            padx=15,
-            cursor='hand2',
-            activebackground=COLOR_ERROR,
-            activeforeground=COLOR_TEXT_PRIMARY
-        )
-        close_btn.pack(side=tk.RIGHT)
+        # Close button - REMOVED (using system title bar close button instead)
         
         # Content
         content_frame = tk.Frame(container, bg=COLOR_BG_DARK)
         content_frame.pack(fill=tk.BOTH, expand=True, padx=25, pady=20)
         
-        message_label = tk.Label(
+        # Message text - use Text widget for better multi-line support
+        message_text = tk.Text(
             content_frame,
-            text=message,
             bg=COLOR_BG_DARK,
             fg=COLOR_TEXT_PRIMARY,
             font=('Segoe UI', 11),
-            justify=tk.LEFT,
-            wraplength=400
+            wrap=tk.WORD,
+            width=45,
+            height=max(3, message.count('\n') + 1),
+            relief=tk.FLAT,
+            bd=0,
+            padx=0,
+            pady=0,
+            highlightthickness=0,
+            insertwidth=0
         )
-        message_label.pack(anchor=tk.W, pady=(0, 20))
+        message_text.insert('1.0', message)
+        message_text.config(state=tk.DISABLED)
+        message_text.pack(anchor=tk.W, fill=tk.BOTH, expand=True, pady=(0, 20))
         
         # Buttons
         btn_frame = tk.Frame(content_frame, bg=COLOR_BG_DARK)
