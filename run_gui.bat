@@ -4,6 +4,6 @@ echo Checking Python environment...
 python --version
 echo.
 echo Running GUI application...
-python gui_test_app.py
+python run_gui.py
 pause
 
