@@ -14,7 +14,9 @@
 cd ~/audio-ai && source venv/bin/activate && uvicorn api.main:app --host 0.0.0.0 --port 8000
 
 # Test with GUI (on local machine)
-python gui_test_app.py
+python run_gui.py
+# Or on Windows:
+run_gui.bat
 ```
 
 ---
@@ -32,6 +34,7 @@ A robust per-stem audio provenance system that detects AI-generated content and 
 - **Robustness**: Handles compression, pitch/time shifts, EQ, reverb, and other distortions
 - **Provenance Reports**: Comprehensive JSON reports with matches, probabilities, and risk flags
 - **REST API**: FastAPI endpoints for programmatic access
+- **Modern GUI**: Modular desktop application with step-by-step wizard interface, real-time progress tracking, and interactive visualizations
 
 ## Installation
 
@@ -121,18 +124,56 @@ curl -X POST "http://localhost:8000/api/v1/provenance-check" \
   -F "file=@data/raw/test_audio.wav"
 ```
 
+### 5. Run GUI Application
+
+```bash
+# Python entry point
+python run_gui.py
+
+# Windows batch file
+run_gui.bat
+```
+
+The GUI provides a modern, step-by-step interface for:
+- **Step 1**: API connection and audio file upload with progress tracking
+- **Step 2**: Real-time processing status monitoring
+- **Step 3**: Interactive report display with:
+  - Summary view (2-column layout)
+  - Full JSON report with syntax highlighting
+  - Visualizations (AI probability timeline, risk distribution, stems analysis, summary charts)
+  - Processing logs
+
+The GUI is built with a modular architecture for maintainability and extensibility. See `gui/README.md` for details.
+
 ## Project Structure
 
 ```
 audio-ai/
 ├── src/                    # Source code
+│   ├── stage1_ingestion/      # File validation & storage
 │   ├── stage2_preprocessing/  # Segmentation & stem separation
 │   ├── stage3_embedding/       # Embedding generation & training
 │   ├── stage4_indexing/        # FAISS indexing
 │   ├── stage5_classifier/      # AI vs Human classification
 │   ├── stage6_reporting/       # Provenance report generation
-│   └── pipeline/              # Pipeline orchestration
+│   ├── pipeline/              # Pipeline orchestration
+│   └── utils/                 # Utility functions
 ├── api/                    # FastAPI server
+│   ├── main.py             # API endpoints
+│   └── models.py           # API data models
+├── gui/                    # Modular GUI application
+│   ├── main.py             # Main application orchestrator
+│   ├── api_client.py       # API client for backend communication
+│   ├── constants.py        # Configuration constants
+│   ├── dialogs.py          # Custom alert/confirm dialogs
+│   ├── theme.py            # Theme configuration
+│   ├── utils.py            # Utility functions (logger, window styling)
+│   ├── report_display.py   # Report formatting and display
+│   ├── visualizations.py   # Chart generation (matplotlib)
+│   └── steps/              # Step components
+│       ├── step1_upload.py      # Connection & File Upload
+│       ├── step2_processing.py  # Processing Status
+│       └── step3_report.py     # Report Display
 ├── scripts/                # Training & evaluation scripts
 ├── config/                 # Configuration files
 ├── data/                   # Data directories
@@ -142,7 +183,9 @@ audio-ai/
 │   ├── indexes/            # FAISS indices
 │   └── reports/            # Provenance reports
 ├── models/                 # Trained models
-└── tests/                  # Unit tests
+├── tests/                  # Unit tests
+├── run_gui.py             # GUI entry point
+└── run_gui.bat            # Windows GUI launcher
 ```
 
 ## Configuration
@@ -262,6 +305,22 @@ OpenL3 will download models automatically on first use. If network issues:
 ```bash
 pip install openl3 --timeout=600 --retries=10
 ```
+
+### GUI Application Issues
+
+**Matplotlib not available:**
+```bash
+pip install matplotlib
+```
+
+**Icon not displaying (Windows):**
+- Ensure `icon.ico` exists in the project root
+- The icon will be set automatically on application start
+
+**Import errors:**
+- Ensure all dependencies are installed: `pip install -r requirements.txt`
+- Verify you're using the correct Python environment
+- Check that the `gui/` directory structure is intact
 
 ## License
 

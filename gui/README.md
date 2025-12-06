@@ -65,7 +65,13 @@ if __name__ == "__main__":
 Or use the entry point:
 
 ```bash
-python gui_test_app_new.py
+python run_gui.py
+```
+
+Or on Windows:
+
+```bash
+run_gui.bat
 ```
 
 ## Design Principles
@@ -86,7 +92,48 @@ python gui_test_app_new.py
 5. **Enhanced Collaboration**: Multiple developers can work on different modules
 6. **Future Extensibility**: New features can be added as new modules or components
 
-## Migration Notes
+## Entry Point
 
-The original `gui_test_app.py` file is preserved for reference. The new modular structure maintains 100% feature parity while providing a much cleaner architecture.
+The GUI application can be launched using:
+
+- **Python**: `python run_gui.py` (from project root)
+- **Windows Batch**: `run_gui.bat` (double-click or run from command line)
+- **Direct Import**: `from gui.main import main; main()`
+
+## Development
+
+### Adding New Features
+
+1. **New UI Component**: Create a new module in `gui/` or `gui/steps/`
+2. **New API Endpoint**: Update `api_client.py` with new methods
+3. **New Visualization**: Add chart generation methods to `visualizations.py`
+4. **New Dialog**: Extend `dialogs.py` with new dialog types
+
+### Testing Components
+
+Each component can be tested independently:
+
+```python
+# Test API client
+from gui.api_client import APIClient
+client = APIClient("http://localhost:8000")
+# ... test methods
+
+# Test report displayer
+from gui.report_display import ReportDisplayer
+# ... test formatting
+
+# Test step components
+from gui.steps import Step1Upload, Step2Processing, Step3Report
+# ... test UI components
+```
+
+## Architecture Benefits
+
+The modular structure provides:
+- **Maintainability**: Easy to locate and modify specific functionality
+- **Scalability**: New features can be added without touching existing code
+- **Testability**: Each component can be unit tested in isolation
+- **Collaboration**: Multiple developers can work on different modules simultaneously
+- **Code Reuse**: Components can be reused across different parts of the application
 
