@@ -1,0 +1,1537 @@
+{
+  "job_id": null,
+  "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+  "original_filename": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1).wav",
+  "duration_sec": 29.44,
+  "sample_rate": 44100,
+  "created_at": "2025-12-05T22:59:17.420330",
+  "pipeline_version": "e0aef06918327142",
+  "model_provenance": {
+    "fingerprint_model": "librosa",
+    "fingerprint_model_checksum": "unknown",
+    "classifier_model": "RandomForest (per-stem)",
+    "index_config": {
+      "index_type": "None",
+      "total_vectors": 0
+    },
+    "augmentation_profile": "default",
+    "embedding_dim": 512,
+    "model_type": "librosa"
+  },
+  "segments": [
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0000",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 0.0,
+      "end": 0.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0000_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0001",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 0.5,
+      "end": 1.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0001_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0002",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 1.0,
+      "end": 1.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0002_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0003",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 1.5,
+      "end": 2.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0003_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0004",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 2.0,
+      "end": 2.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0004_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0005",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 2.5,
+      "end": 3.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0005_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0006",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 3.0,
+      "end": 3.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0006_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0007",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 3.5,
+      "end": 4.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0007_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0008",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 4.0,
+      "end": 4.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0008_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0009",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 4.5,
+      "end": 5.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0009_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0010",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 5.0,
+      "end": 5.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0010_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0011",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 5.5,
+      "end": 6.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0011_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0012",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 6.0,
+      "end": 6.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0012_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0013",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 6.5,
+      "end": 7.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0013_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0014",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 7.0,
+      "end": 7.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0014_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0015",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 7.5,
+      "end": 8.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0015_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0016",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 8.0,
+      "end": 8.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0016_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0017",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 8.5,
+      "end": 9.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0017_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0018",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 9.0,
+      "end": 9.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0018_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0019",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 9.5,
+      "end": 10.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0019_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0020",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 10.0,
+      "end": 10.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0020_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0021",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 10.5,
+      "end": 11.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0021_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0022",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 11.0,
+      "end": 11.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0022_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0023",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 11.5,
+      "end": 12.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0023_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0024",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 12.0,
+      "end": 12.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0024_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0025",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 12.5,
+      "end": 13.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0025_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0026",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 13.0,
+      "end": 13.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0026_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0027",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 13.5,
+      "end": 14.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0027_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0028",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 14.0,
+      "end": 14.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0028_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0029",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 14.5,
+      "end": 15.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0029_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0030",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 15.0,
+      "end": 15.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0030_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0031",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 15.5,
+      "end": 16.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0031_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0032",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 16.0,
+      "end": 16.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0032_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0033",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 16.5,
+      "end": 17.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0033_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0034",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 17.0,
+      "end": 17.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0034_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0035",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 17.5,
+      "end": 18.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0035_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0036",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 18.0,
+      "end": 18.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0036_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0037",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 18.5,
+      "end": 19.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0037_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0038",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 19.0,
+      "end": 19.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0038_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0039",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 19.5,
+      "end": 20.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0039_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0040",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 20.0,
+      "end": 20.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0040_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0041",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 20.5,
+      "end": 21.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0041_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0042",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 21.0,
+      "end": 21.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0042_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0043",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 21.5,
+      "end": 22.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0043_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0044",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 22.0,
+      "end": 22.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0044_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0045",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 22.5,
+      "end": 23.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0045_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0046",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 23.0,
+      "end": 23.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0046_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0047",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 23.5,
+      "end": 24.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0047_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0048",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 24.0,
+      "end": 24.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0048_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0049",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 24.5,
+      "end": 25.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0049_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0050",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 25.0,
+      "end": 25.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0050_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0051",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 25.5,
+      "end": 26.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0051_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0052",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 26.0,
+      "end": 26.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0052_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0053",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 26.5,
+      "end": 27.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0053_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0054",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 27.0,
+      "end": 27.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0054_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0055",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 27.5,
+      "end": 28.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0055_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0056",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 28.0,
+      "end": 28.5,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0056_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0057",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 28.5,
+      "end": 29.0,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0057_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    },
+    {
+      "segment_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0058",
+      "file_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)",
+      "start": 29.0,
+      "end": 29.44,
+      "duration": 0.5,
+      "stems": [
+        {
+          "stem_type": "vocals",
+          "embedding_id": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)_seg_0058_vocals",
+          "classifier": {
+            "ai_probability": 0.5,
+            "calibrated_probability": 0.5,
+            "human_probability": 0.5
+          },
+          "matches": [],
+          "final_decision": "human",
+          "confidence_bucket": "medium",
+          "fusion_score": 0.31192029220221174,
+          "consecutive_matches": 0
+        }
+      ],
+      "match_count": 0,
+      "risk_flag": "low"
+    }
+  ],
+  "stems_summary": [
+    {
+      "stem_type": "vocals",
+      "aggregated_ai_score": 0.3119202922022118,
+      "matches_found": 0,
+      "risk_flags": "low",
+      "segment_count": 59,
+      "ai_segment_count": 0
+    }
+  ],
+  "overall_summary": {
+    "total_segments": 59,
+    "segments_with_matches": 0,
+    "segments_flagged_ai": 0,
+    "overall_verification_status": "verified",
+    "overall_risk": "low",
+    "recommended_action": "no_action_needed",
+    "overall_ai_probability": 0.31192029220221185
+  },
+  "audit": {
+    "processing_time_sec": 0.698835,
+    "logs_path": "data/processing/ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1)/processing.log"
+  },
+  "metadata": {
+    "input_file": "data/uploads/ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1).wav",
+    "original_filename": "ebac84af-c6b2-4c2b-9a70-a84ecd7114a4_111 (1).wav",
+    "duration_sec": 29.44,
+    "processing_timestamp": "2025-12-06T04:57:57.943552",
+    "stems_processed": [
+      "vocals",
+      "drums",
+      "bass",
+      "other"
+    ],
+    "model_type": "librosa",
+    "index_type": "None",
+    "index_size": 0,
+    "augmentation_profile": "default"
+  }
+}
