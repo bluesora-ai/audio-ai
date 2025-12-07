@@ -243,14 +243,32 @@ class FAISSIndexer:
             index_path: Path to FAISS index file
             metadata_path: Path to metadata JSON file
         """
-        # Load FAISS index
-        self.index = faiss.read_index(str(index_path))
-        
-        # Load metadata
-        with open(metadata_path, "r") as f:
-            self.metadata = json.load(f)
-        
-        logger.info(f"Loaded index with {self.index.ntotal} vectors from {index_path}")
+        try:
+            # Load FAISS index
+            logger.info(f"Attempting to load FAISS index from: {index_path}")
+            if not index_path.exists():
+                raise FileNotFoundError(f"Index file not found: {index_path}")
+            if not metadata_path.exists():
+                raise FileNotFoundError(f"Metadata file not found: {metadata_path}")
+            
+            self.index = faiss.read_index(str(index_path))
+            
+            # Load metadata
+            with open(metadata_path, "r") as f:
+                self.metadata = json.load(f)
+            
+            logger.info(f"✅ Successfully loaded index with {self.index.ntotal} vectors from {index_path}")
+            logger.info(f"   Metadata entries: {len(self.metadata)}")
+            logger.info(f"   Index type: {type(self.index).__name__}")
+            
+            # Verify consistency
+            if self.index.ntotal != len(self.metadata):
+                logger.warning(f"⚠️ Index has {self.index.ntotal} vectors but metadata has {len(self.metadata)} entries")
+        except Exception as e:
+            logger.error(f"❌ Failed to load index: {e}")
+            logger.error(f"   Index path: {index_path}")
+            logger.error(f"   Metadata path: {metadata_path}")
+            raise  # Re-raise to let caller know it failed
     
     def get_stats(self) -> Dict:
         """

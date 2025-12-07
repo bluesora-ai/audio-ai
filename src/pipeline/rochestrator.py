@@ -61,23 +61,44 @@ class PipelineOrchestrator:
         
         # Load FAISS index
         self.indexer = FAISSIndexer(embedding_dim=embedding_dim)
-        if index_path and index_path.exists() and metadata_path and metadata_path.exists():
-            try:
-                self.indexer.load_index(index_path, metadata_path)
-                stats = self.indexer.get_stats()
-                logger.info(f"✅ Loaded FAISS index from {index_path}")
-                logger.info(f"   Index type: {stats.get('index_type')}, Vectors: {stats.get('total_vectors')}")
-            except Exception as e:
-                logger.error(f"❌ Failed to load index: {e}")
-                logger.error(f"   Index path: {index_path}")
-                logger.error(f"   Metadata path: {metadata_path}")
-                logger.warning("   Similarity search will not work without a loaded index.")
+        self._index_loaded = False
+        
+        if index_path and metadata_path:
+            # Check if files exist
+            index_exists = index_path.exists()
+            metadata_exists = metadata_path.exists()
+            
+            logger.info(f"Checking index files:")
+            logger.info(f"   Index path: {index_path}")
+            logger.info(f"   Index exists: {index_exists}")
+            logger.info(f"   Metadata path: {metadata_path}")
+            logger.info(f"   Metadata exists: {metadata_exists}")
+            
+            if index_exists and metadata_exists:
+                try:
+                    self.indexer.load_index(index_path, metadata_path)
+                    stats = self.indexer.get_stats()
+                    self._index_loaded = True
+                    logger.info(f"✅ FAISS index successfully loaded!")
+                    logger.info(f"   Index type: {stats.get('index_type')}")
+                    logger.info(f"   Total vectors: {stats.get('total_vectors')}")
+                    logger.info(f"   Embedding dim: {stats.get('embedding_dim')}")
+                except Exception as e:
+                    logger.error(f"❌ Failed to load index: {e}")
+                    logger.error(f"   Error type: {type(e).__name__}")
+                    import traceback
+                    logger.error(f"   Traceback: {traceback.format_exc()}")
+                    logger.warning("   Similarity search will not work without a loaded index.")
+                    self._index_loaded = False
+            else:
+                if not index_exists:
+                    logger.warning(f"⚠️ Index file not found: {index_path}")
+                if not metadata_exists:
+                    logger.warning(f"⚠️ Metadata file not found: {metadata_path}")
+                logger.warning("⚠️ FAISS index not loaded. Similarity search will not work.")
+                logger.warning("   To build an index, run: python scripts/build_index.py --embeddings_dir data/embeddings")
         else:
-            if not index_path or not index_path.exists():
-                logger.warning(f"⚠️ Index file not found: {index_path}")
-            if not metadata_path or not metadata_path.exists():
-                logger.warning(f"⚠️ Metadata file not found: {metadata_path}")
-            logger.warning("⚠️ FAISS index not loaded. Similarity search will not work.")
+            logger.warning("⚠️ Index paths not provided. Similarity search will not work.")
         
         # Load classifiers
         self.classifiers = {}
@@ -189,17 +210,22 @@ class PipelineOrchestrator:
                 
                 # Search for matches
                 search_start = time.time()
-                # Use lower threshold (0.5) to catch more potential matches
-                search_results = self.indexer.search(emb, k=10, threshold=0.5)
+                if self._index_loaded and self.indexer.index is not None and self.indexer.index.ntotal > 0:
+                    # Use lower threshold (0.5) to catch more potential matches
+                    search_results = self.indexer.search(emb, k=10, threshold=0.5)
+                    if search_results:
+                        logger.debug(f"Found {len(search_results)} matches for {segment_id}_{stem_type}")
+                    else:
+                        logger.debug(f"No matches above threshold for {segment_id}_{stem_type} (index has {self.indexer.index.ntotal} vectors)")
+                else:
+                    # Index not loaded, return empty results
+                    search_results = []
+                    if not self._index_loaded:
+                        logger.warning(f"⚠️ Index not loaded - skipping similarity search for {segment_id}_{stem_type}")
+                
                 search_duration = time.time() - search_start
                 self.performance_tracker.record_search_time(search_duration)
                 matches[f"{segment_id}_{stem_type}"] = search_results
-                
-                # Log search results for debugging
-                if search_results:
-                    logger.debug(f"Found {len(search_results)} matches for {segment_id}_{stem_type}")
-                elif self.indexer.index is not None and self.indexer.index.ntotal > 0:
-                    logger.debug(f"No matches found for {segment_id}_{stem_type} (index has {self.indexer.index.ntotal} vectors)")
                 
                 # Track consecutive matches for fusion formula
                 if search_results:
