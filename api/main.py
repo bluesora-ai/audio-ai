@@ -202,3 +202,18 @@ async def root():
 async def health():
     """Health check endpoint."""
     return {"status": "healthy"}
+
+
+@app.get("/api/v1/index-status")
+async def get_index_status():
+    """Get FAISS index status and statistics."""
+    index_stats = orchestrator.indexer.get_stats()
+    return {
+        "index_loaded": index_stats.get("index_type", "None") != "None",
+        "index_type": index_stats.get("index_type", "None"),
+        "total_vectors": index_stats.get("total_vectors", 0),
+        "embedding_dim": index_stats.get("embedding_dim", 512),
+        "index_path": str(FAISS_INDEX_PATH),
+        "index_exists": FAISS_INDEX_PATH.exists(),
+        "metadata_exists": FAISS_METADATA_PATH.exists()
+    }
