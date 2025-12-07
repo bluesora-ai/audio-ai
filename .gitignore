@@ -91,7 +91,7 @@ Desktop.ini
 $RECYCLE.BIN/
 
 # Model/data/output folders
-data/
+
 models/
 logs/
 output/
