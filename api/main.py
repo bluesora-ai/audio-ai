@@ -11,6 +11,16 @@ import json
 
 from api.models import ProvenanceRequest, ProvenanceResponse, JobStatus
 from src.pipeline.rochestrator import PipelineOrchestrator
+from src.stage6_reporting.report_builder import ProvenanceReportBuilder
+from config.settings import (
+    FAISS_INDEX_PATH,
+    FAISS_METADATA_PATH,
+    CLASSIFIER_PATHS,
+    EMBEDDING_MODEL_PATH,
+    SEGMENT_LENGTH,
+    SAMPLE_RATE,
+    EMBEDDING_DIM
+)
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -32,7 +42,49 @@ app.add_middleware(
 
 # Global state
 jobs: Dict[str, Dict] = {}
-orchestrator = PipelineOrchestrator()
+
+# Calculate hashes for provenance tracking
+def calculate_file_hash(file_path: Path) -> str:
+    """Calculate SHA256 hash of a file."""
+    if not file_path.exists():
+        return "unknown"
+    import hashlib
+    sha256 = hashlib.sha256()
+    with open(file_path, 'rb') as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            sha256.update(chunk)
+    return sha256.hexdigest()[:16]
+
+# Initialize orchestrator with index and classifiers
+logger.info("Initializing pipeline orchestrator...")
+logger.info(f"Index path: {FAISS_INDEX_PATH}")
+logger.info(f"Index exists: {FAISS_INDEX_PATH.exists()}")
+logger.info(f"Metadata exists: {FAISS_METADATA_PATH.exists()}")
+
+# Calculate model and index hashes for provenance
+model_hash = calculate_file_hash(EMBEDDING_MODEL_PATH) if EMBEDDING_MODEL_PATH else None
+index_hash = calculate_file_hash(FAISS_INDEX_PATH) if FAISS_INDEX_PATH.exists() else None
+
+orchestrator = PipelineOrchestrator(
+    segment_length=SEGMENT_LENGTH,
+    sample_rate=SAMPLE_RATE,
+    embedding_dim=EMBEDDING_DIM,
+    index_path=FAISS_INDEX_PATH if FAISS_INDEX_PATH.exists() else None,
+    metadata_path=FAISS_METADATA_PATH if FAISS_METADATA_PATH.exists() else None,
+    classifier_paths=CLASSIFIER_PATHS,
+    model_hash=model_hash,
+    index_hash=index_hash
+)
+
+# Log index status
+index_stats = orchestrator.indexer.get_stats()
+logger.info(f"Index status: {index_stats}")
+if index_stats.get("total_vectors", 0) == 0:
+    logger.warning("⚠️ FAISS index is empty or not loaded. Similarity search will not work.")
+    logger.warning("   To build an index, run: python scripts/build_index.py --embeddings_dir data/embeddings")
+else:
+    logger.info(f"✅ FAISS index loaded: {index_stats.get('total_vectors')} vectors, type: {index_stats.get('index_type')}")
+    logger.info(f"   Index hash: {index_hash}")
 
 
 @app.post("/api/v1/provenance-check", response_model=ProvenanceResponse)

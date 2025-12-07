@@ -64,9 +64,20 @@ class PipelineOrchestrator:
         if index_path and index_path.exists() and metadata_path and metadata_path.exists():
             try:
                 self.indexer.load_index(index_path, metadata_path)
-                logger.info(f"Loaded FAISS index from {index_path}")
+                stats = self.indexer.get_stats()
+                logger.info(f"✅ Loaded FAISS index from {index_path}")
+                logger.info(f"   Index type: {stats.get('index_type')}, Vectors: {stats.get('total_vectors')}")
             except Exception as e:
-                logger.warning(f"Failed to load index: {e}. Will create new index.")
+                logger.error(f"❌ Failed to load index: {e}")
+                logger.error(f"   Index path: {index_path}")
+                logger.error(f"   Metadata path: {metadata_path}")
+                logger.warning("   Similarity search will not work without a loaded index.")
+        else:
+            if not index_path or not index_path.exists():
+                logger.warning(f"⚠️ Index file not found: {index_path}")
+            if not metadata_path or not metadata_path.exists():
+                logger.warning(f"⚠️ Metadata file not found: {metadata_path}")
+            logger.warning("⚠️ FAISS index not loaded. Similarity search will not work.")
         
         # Load classifiers
         self.classifiers = {}
@@ -178,10 +189,17 @@ class PipelineOrchestrator:
                 
                 # Search for matches
                 search_start = time.time()
-                search_results = self.indexer.search(emb, k=10, threshold=0.7)
+                # Use lower threshold (0.5) to catch more potential matches
+                search_results = self.indexer.search(emb, k=10, threshold=0.5)
                 search_duration = time.time() - search_start
                 self.performance_tracker.record_search_time(search_duration)
                 matches[f"{segment_id}_{stem_type}"] = search_results
+                
+                # Log search results for debugging
+                if search_results:
+                    logger.debug(f"Found {len(search_results)} matches for {segment_id}_{stem_type}")
+                elif self.indexer.index is not None and self.indexer.index.ntotal > 0:
+                    logger.debug(f"No matches found for {segment_id}_{stem_type} (index has {self.indexer.index.ntotal} vectors)")
                 
                 # Track consecutive matches for fusion formula
                 if search_results:
