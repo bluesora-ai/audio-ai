@@ -126,17 +126,15 @@ if sys.platform == 'darwin':
     try:
         # APP should be in the namespace - use it directly
         print(f"[PyInstaller] Attempting to use APP from namespace...")
-        app = APP(
+        coll = APP(
             coll,
-            name='AudioProvenanceGUI',
+            name='AudioProvenanceGUI.app',
             icon=icon_path,
             info_plist={
                 'NSPrincipalClass': 'NSApplication',
                 'NSHighResolutionCapable': 'True',
             },
         )
-
-        coll = app
 
         print(f"[PyInstaller] ✓ Successfully created app bundle using APP from namespace")
     except NameError as e:
