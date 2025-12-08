@@ -3,6 +3,17 @@ import os
 import platform
 import sys
 
+# Import PyInstaller utilities for collecting submodules
+gui_submodules = []
+try:
+    from PyInstaller.utils.hooks import collect_submodules
+    gui_submodules = collect_submodules('gui')
+    print(f"[PyInstaller] Collected {len(gui_submodules)} gui submodules: {gui_submodules}")
+except (ImportError, AttributeError) as e:
+    # Fallback if PyInstaller utils not available
+    print(f"[PyInstaller] Could not collect gui submodules automatically: {e}")
+    gui_submodules = []
+
 # APP should be automatically available in PyInstaller spec namespace on macOS
 # But if it's not, we'll try to import it or access it from the namespace
 # Note: PyInstaller injects APP into the spec namespace when executing the spec file
@@ -76,10 +87,12 @@ a = Analysis(
     binaries=[],
     datas=icon_datas,  # Include icon files in bundle for runtime access
     hiddenimports=[
+        # Tkinter modules
         'tkinter',
         'tkinter.ttk',
         'tkinter.filedialog',
         'tkinter.scrolledtext',
+        # Third-party packages
         'requests',
         'numpy',
         'matplotlib',
@@ -87,10 +100,24 @@ a = Analysis(
         'matplotlib.figure',
         'matplotlib.pyplot',
         'PIL._tkinter_finder',  # For PIL/Pillow if used
-    ],
+        # GUI package modules - explicitly include all
+        'gui',
+        'gui.main',
+        'gui.utils',
+        'gui.constants',
+        'gui.theme',
+        'gui.dialogs',
+        'gui.api_client',
+        'gui.report_display',
+        'gui.visualizations',
+        'gui.steps',
+        'gui.steps.step1_upload',
+        'gui.steps.step2_processing',
+        'gui.steps.step3_report',
+    ] + (gui_submodules if gui_submodules else []),  # Add all collected gui submodules
     hookspath=[],
     hooksconfig={},
-    runtime_hooks=[],
+    runtime_hooks=['pyi_rth_gui.py'],
     excludes=[],
     noarchive=False,
     optimize=0,

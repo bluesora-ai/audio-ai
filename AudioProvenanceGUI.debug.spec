@@ -46,10 +46,12 @@ a = Analysis(
     binaries=[],
     datas=icon_datas,
     hiddenimports=[
+        # Tkinter modules
         'tkinter',
         'tkinter.ttk',
         'tkinter.filedialog',
         'tkinter.scrolledtext',
+        # Third-party packages
         'requests',
         'numpy',
         'matplotlib',
@@ -57,6 +59,20 @@ a = Analysis(
         'matplotlib.figure',
         'matplotlib.pyplot',
         'PIL._tkinter_finder',
+        # GUI package modules - explicitly include all
+        'gui',
+        'gui.main',
+        'gui.utils',
+        'gui.constants',
+        'gui.theme',
+        'gui.dialogs',
+        'gui.api_client',
+        'gui.report_display',
+        'gui.visualizations',
+        'gui.steps',
+        'gui.steps.step1_upload',
+        'gui.steps.step2_processing',
+        'gui.steps.step3_report',
     ],
     hookspath=[],
     hooksconfig={},
