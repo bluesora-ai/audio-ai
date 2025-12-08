@@ -50,7 +50,7 @@ jobs:
           echo "⚠ No icon files found - app will build without icon"
         fi
     
-    - name: Build macOS app with PyInstaller
+    - name: Build macOS app with PyInstaller (Apple Silicon)
       run: |
         echo "PyInstaller version:"
         pyinstaller --version
@@ -58,12 +58,24 @@ jobs:
         echo "Cleaning previous builds..."
         rm -rf build dist
         echo ""
-        echo "Building macOS app bundle..."
-        pyinstaller AudioProvenanceGUI.spec --clean --noconfirm
+        echo "Building macOS app bundle for Apple Silicon (ARM64)..."
+        arch -arm64 pyinstaller AudioProvenanceGUI.spec --clean --noconfirm
         echo ""
         echo "Build completed"
         echo "Contents of dist/ after build:"
         ls -la dist/
+    
+    - name: Verify binary architecture
+      run: |
+        if [ -f "dist/AudioProvenanceGUI.app/Contents/MacOS/AudioProvenanceGUI" ]; then
+          echo "Binary architecture:"
+          file dist/AudioProvenanceGUI.app/Contents/MacOS/AudioProvenanceGUI
+          echo ""
+          echo "Expected: Mach-O 64-bit executable arm64"
+        else
+          echo "✗ Executable not found!"
+          exit 1
+        fi
     - name: Install dmgbuild
       run: |
         pip install dmgbuild
