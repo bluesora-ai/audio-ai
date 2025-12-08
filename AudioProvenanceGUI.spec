@@ -2,6 +2,16 @@
 import os
 import platform
 
+# Import APP from PyInstaller for macOS app bundle creation
+try:
+    from PyInstaller.building.api import APP
+except ImportError:
+    # Fallback for older PyInstaller versions
+    try:
+        from PyInstaller.building.build_main import APP
+    except ImportError:
+        APP = None
+
 try:
     spec_dir = os.path.dirname(os.path.abspath(SPECPATH))
 except NameError:
@@ -106,7 +116,7 @@ coll = COLLECT(
 )
 
 # On macOS, wrap COLLECT in APP to create .app bundle
-if system == 'Darwin':
+if system == 'Darwin' and APP is not None:
     app = APP(
         coll,
         name='AudioProvenanceGUI',
