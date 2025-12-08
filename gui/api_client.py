@@ -6,6 +6,11 @@ from typing import Optional, Dict, Callable
 from .constants import TIMEOUT, CONNECT_TIMEOUT, MAX_WAIT, BASE_UPLOAD_TIMEOUT, UPLOAD_TIMEOUT_PER_MB, MAX_UPLOAD_TIMEOUT
 
 
+class UploadCancelledException(Exception):
+    """Exception raised when upload is cancelled."""
+    pass
+
+
 class APIClient:
     """Client for interacting with the Audio Provenance API."""
     
@@ -32,7 +37,8 @@ class APIClient:
     def upload_file(
         self,
         file_path: Path,
-        progress_callback: Optional[Callable[[int, int], None]] = None
+        progress_callback: Optional[Callable[[int, int], None]] = None,
+        cancellation_check: Optional[Callable[[], bool]] = None
     ) -> Dict:
         """
         Upload audio file for provenance checking.
@@ -55,6 +61,10 @@ class APIClient:
             from requests_toolbelt.multipart.encoder import MultipartEncoder, MultipartEncoderMonitor
             
             def monitor_callback(monitor):
+                # Check for cancellation
+                if cancellation_check and cancellation_check():
+                    raise UploadCancelledException("Upload cancelled by user")
+                
                 if progress_callback:
                     progress_callback(monitor.bytes_read, file_size)
             
@@ -65,12 +75,21 @@ class APIClient:
                 monitor = MultipartEncoderMonitor(encoder, monitor_callback)
                 
                 headers = {'Content-Type': monitor.content_type}
+                
+                # Check for cancellation before starting request
+                if cancellation_check and cancellation_check():
+                    raise UploadCancelledException("Upload cancelled by user")
+                
                 response = requests.post(
                     f"{self.base_url}/api/v1/provenance-check",
                     data=monitor,
                     headers=headers,
                     timeout=dynamic_timeout
                 )
+            
+            # Check for cancellation after request completes
+            if cancellation_check and cancellation_check():
+                raise CancelledException("Upload cancelled by user")
             
             # Final progress update
             if progress_callback:
@@ -97,6 +116,10 @@ class APIClient:
                 uploaded = 0
                 with open(file_path, 'rb') as f:
                     while True:
+                        # Check for cancellation during encoding
+                        if cancellation_check and cancellation_check():
+                            raise UploadCancelledException("Upload cancelled by user")
+                        
                         chunk = f.read(chunk_size)
                         if not chunk:
                             break
@@ -111,8 +134,17 @@ class APIClient:
                 
                 return b''.join(body_parts), f'multipart/form-data; boundary={boundary}'
             
+            # Check for cancellation before encoding
+            if cancellation_check and cancellation_check():
+                raise UploadCancelledException("Upload cancelled by user")
+            
             data, content_type = encode_multipart()
             headers = {'Content-Type': content_type}
+            
+            # Check for cancellation before sending request
+            if cancellation_check and cancellation_check():
+                raise UploadCancelledException("Upload cancelled by user")
+            
             response = requests.post(
                 f"{self.base_url}/api/v1/provenance-check",
                 data=data,
@@ -120,9 +152,17 @@ class APIClient:
                 timeout=dynamic_timeout
             )
             
+            # Check for cancellation after request completes
+            if cancellation_check and cancellation_check():
+                raise UploadCancelledException("Upload cancelled by user")
+            
             # Final progress update
             if progress_callback:
                 progress_callback(file_size, file_size)
+        
+        except UploadCancelledException:
+            # Re-raise cancellation exception
+            raise
         
         response.raise_for_status()
         return response.json()

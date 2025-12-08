@@ -16,7 +16,8 @@ class Step1Upload:
     def __init__(self, parent: tk.Frame, url_var: tk.StringVar,
                  on_test_connection: Callable,
                  on_upload: Callable,
-                 on_browse_file: Optional[Callable] = None):
+                 on_browse_file: Optional[Callable] = None,
+                 on_remove_file: Optional[Callable] = None):
         """
         Initialize Step 1 component.
         
@@ -26,12 +27,14 @@ class Step1Upload:
             on_test_connection: Callback for test connection button
             on_upload: Callback for upload button
             on_browse_file: Optional callback for file browse
+            on_remove_file: Optional callback for file removal (called when remove button is clicked)
         """
         self.parent = parent
         self.url_var = url_var
         self.on_test_connection = on_test_connection
         self.on_upload = on_upload
         self.on_browse_file = on_browse_file or self._default_browse_file
+        self.on_remove_file = on_remove_file
         
         self.frame = None
         self.file_var = tk.StringVar()
@@ -43,6 +46,10 @@ class Step1Upload:
         self.file_path_entry = None
         self.file_display_container = None
         self.file_info_frame = None
+        self.upload_btn = None
+        self.drop_frame = None
+        self.drop_content = None
+        self.browse_enabled = True
         
         self._create_ui()
     
@@ -80,8 +87,8 @@ class Step1Upload:
         self._create_progress_bar(step1_inner)
         
         # Upload Button
-        upload_btn = create_button(step1_inner, "Upload & Process Track", self.on_upload, 'primary')
-        upload_btn.grid(row=5, column=0, sticky=tk.W, pady=(0, 0))
+        self.upload_btn = create_button(step1_inner, "Upload & Process Track", self.on_upload, 'primary')
+        self.upload_btn.grid(row=5, column=0, sticky=tk.W, pady=(0, 0))
         
         # Bottom spacer
         tk.Frame(step1_inner, bg=COLOR_BG_CARD, height=1).grid(
@@ -143,7 +150,7 @@ class Step1Upload:
         ).grid(row=0, column=0, sticky=tk.W, pady=(0, 12))
         
         # Drag and Drop Area
-        drop_frame = tk.Frame(
+        self.drop_frame = tk.Frame(
             upload_section,
             bg=COLOR_BG_CARD,
             relief=tk.FLAT,
@@ -152,13 +159,13 @@ class Step1Upload:
             highlightbackground="#666666",
             highlightcolor="#666666"
         )
-        drop_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), ipady=10, ipadx=20)
+        self.drop_frame.grid(row=1, column=0, sticky=(tk.W, tk.E), ipady=10, ipadx=20)
         
-        drop_content = tk.Frame(drop_frame, bg=COLOR_BG_CARD)
-        drop_content.pack(expand=True, fill=tk.BOTH)
+        self.drop_content = tk.Frame(self.drop_frame, bg=COLOR_BG_CARD)
+        self.drop_content.pack(expand=True, fill=tk.BOTH)
         
         tk.Label(
-            drop_content,
+            self.drop_content,
             text="☁",
             bg=COLOR_BG_CARD,
             fg=COLOR_TEXT_PRIMARY,
@@ -166,7 +173,7 @@ class Step1Upload:
         ).pack(pady=(12, 8))
         
         tk.Label(
-            drop_content,
+            self.drop_content,
             text="Drag & drop your audio file here",
             bg=COLOR_BG_CARD,
             fg=COLOR_TEXT_PRIMARY,
@@ -174,7 +181,7 @@ class Step1Upload:
         ).pack(pady=(0, 4))
         
         tk.Label(
-            drop_content,
+            self.drop_content,
             text="or click to browse",
             bg=COLOR_BG_CARD,
             fg=COLOR_TEXT_SECONDARY,
@@ -182,10 +189,7 @@ class Step1Upload:
         ).pack()
         
         # Make clickable
-        for widget in [drop_frame, drop_content]:
-            widget.bind("<Button-1>", lambda e: self.on_browse_file())
-            widget.bind("<Enter>", lambda e: drop_frame.config(highlightbackground=COLOR_ACCENT))
-            widget.bind("<Leave>", lambda e: drop_frame.config(highlightbackground="#666666"))
+        self._bind_browse_handlers()
     
     def _create_file_info(self, parent: tk.Frame):
         """Create file info display."""
@@ -267,8 +271,41 @@ class Step1Upload:
         )
         self.upload_progress_label.grid(row=1, column=0, sticky=tk.W)
     
+    def _on_browse_click(self, event):
+        """Handle browse click event."""
+        if self.browse_enabled:
+            self.on_browse_file()
+    
+    def _on_browse_enter(self, event):
+        """Handle browse enter event."""
+        if self.browse_enabled and self.drop_frame:
+            self.drop_frame.config(highlightbackground=COLOR_ACCENT, cursor='hand2')
+    
+    def _on_browse_leave(self, event):
+        """Handle browse leave event."""
+        if self.drop_frame:
+            self.drop_frame.config(highlightbackground="#666666", cursor='')
+    
+    def _bind_browse_handlers(self):
+        """Bind click handlers for browse functionality."""
+        if self.drop_frame and self.drop_content:
+            for widget in [self.drop_frame, self.drop_content]:
+                widget.bind("<Button-1>", self._on_browse_click)
+                widget.bind("<Enter>", self._on_browse_enter)
+                widget.bind("<Leave>", self._on_browse_leave)
+    
+    def _unbind_browse_handlers(self):
+        """Unbind click handlers for browse functionality."""
+        if self.drop_frame and self.drop_content:
+            for widget in [self.drop_frame, self.drop_content]:
+                widget.unbind("<Button-1>")
+                widget.unbind("<Enter>")
+                widget.unbind("<Leave>")
+    
     def _default_browse_file(self):
         """Default file browse handler."""
+        if not self.browse_enabled:
+            return
         filename = filedialog.askopenfilename(
             title="Select Audio File",
             filetypes=[
@@ -295,6 +332,10 @@ class Step1Upload:
     
     def remove_file(self):
         """Remove selected file."""
+        # Call the callback if provided (e.g., to cancel upload)
+        if self.on_remove_file:
+            self.on_remove_file()
+        
         self.selected_file = None
         self.file_var.set("")
         self.file_size_mb = 0
@@ -309,4 +350,28 @@ class Step1Upload:
     def get_file_size_mb(self) -> float:
         """Get selected file size in MB."""
         return self.file_size_mb
+    
+    def set_upload_enabled(self, enabled: bool):
+        """Enable or disable the upload button."""
+        if self.upload_btn:
+            if enabled:
+                self.upload_btn.config(state=tk.NORMAL, cursor='hand2')
+            else:
+                self.upload_btn.config(state=tk.DISABLED, cursor='arrow')
+    
+    def set_browse_enabled(self, enabled: bool):
+        """Enable or disable the browse file functionality."""
+        self.browse_enabled = enabled
+        if enabled:
+            self._bind_browse_handlers()
+            if self.drop_frame:
+                self.drop_frame.config(highlightbackground="#666666", cursor='hand2')
+            if self.drop_content:
+                self.drop_content.config(cursor='hand2')
+        else:
+            self._unbind_browse_handlers()
+            if self.drop_frame:
+                self.drop_frame.config(highlightbackground="#333333", cursor='arrow')
+            if self.drop_content:
+                self.drop_content.config(cursor='arrow')
 

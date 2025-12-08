@@ -54,6 +54,8 @@ class BeatlibraryProvenanceApp:
         self.current_step = 1
         self.drag_start_x = 0
         self.drag_start_y = 0
+        self.upload_cancelled = False
+        self.upload_in_progress = False
         
         # API client
         self.url_var = tk.StringVar(value=BASE_URL)
@@ -190,7 +192,8 @@ class BeatlibraryProvenanceApp:
             self.step_container,
             self.url_var,
             self.test_health,
-            self.upload_and_process
+            self.upload_and_process,
+            on_remove_file=self.handle_remove_file
         )
         
         # Step 2: Processing
@@ -371,6 +374,16 @@ class BeatlibraryProvenanceApp:
         
         threading.Thread(target=run_test, daemon=True).start()
     
+    def handle_remove_file(self):
+        """Handle file removal - cancel upload if in progress."""
+        if self.upload_in_progress:
+            self.upload_cancelled = True
+            self.logger.log("Upload cancellation requested...", "INFO")
+            self.step2.set_status("Cancelling upload...")
+            # Immediately re-enable upload button and browse functionality
+            self.step1.set_upload_enabled(True)
+            self.step1.set_browse_enabled(True)
+    
     def upload_and_process(self):
         """Upload file and start processing."""
         filename = self.step1.get_selected_file()
@@ -394,6 +407,14 @@ class BeatlibraryProvenanceApp:
             ):
                 return
         
+        # Disable upload button and browse functionality when upload starts
+        self.step1.set_upload_enabled(False)
+        self.step1.set_browse_enabled(False)
+        
+        # Reset cancellation flag and set upload in progress
+        self.upload_cancelled = False
+        self.upload_in_progress = True
+        
         def run_upload():
             self.root.after(0, lambda: self.step1.upload_progress.config(mode='determinate', maximum=100, value=0))
             self.root.after(0, lambda: self.step1.upload_progress_label.config(text="0% - Starting upload..."))
@@ -402,7 +423,15 @@ class BeatlibraryProvenanceApp:
             self.root.after(0, lambda: self.step2.set_status("Uploading track..."))
             self.logger.log(f"Uploading: {file_path.name}", "INFO")
             
+            def cancellation_check():
+                """Check if upload should be cancelled."""
+                return self.upload_cancelled
+            
             def progress_callback(uploaded, total):
+                # Check if upload was cancelled
+                if self.upload_cancelled:
+                    return
+                
                 if total > 0:
                     percent = min(int((uploaded / total) * 100), 100)
                     self.root.after(0, lambda p=percent: self.step1.upload_progress.config(value=p))
@@ -417,8 +446,22 @@ class BeatlibraryProvenanceApp:
                         ))
             
             try:
+                # Check if cancelled before starting upload
+                if self.upload_cancelled:
+                    self.logger.log("Upload cancelled by user", "INFO")
+                    self.root.after(0, lambda: self.step2.set_status("Upload cancelled"))
+                    return
+                
                 self.api_client.base_url = self.url_var.get().rstrip('/')
-                response = self.api_client.upload_file(file_path, progress_callback)
+                response = self.api_client.upload_file(file_path, progress_callback, cancellation_check)
+                
+                # Check if cancelled after upload completes
+                if self.upload_cancelled:
+                    self.logger.log("Upload cancelled by user", "INFO")
+                    self.root.after(0, lambda: self.step2.set_status("Upload cancelled"))
+                    self.root.after(0, lambda: self.step1.upload_progress_label.config(text="Cancelled"))
+                    self.root.after(0, lambda: self.step2.progress_label.config(text="Cancelled"))
+                    return
                 
                 self.job_id = response.get('job_id')
                 self.step2.set_job_id(self.job_id)
@@ -436,12 +479,23 @@ class BeatlibraryProvenanceApp:
                 self.root.after(0, lambda: self.show_step(2))
                 self.root.after(0, lambda: self.auto_check_status())
             except Exception as e:
-                self.logger.log(f"❌ Upload error: {e}", "ERROR")
-                self.step2.set_status("❌ Upload Error")
-                self.show_alert("Error", f"Upload error: {e}", 'error')
+                # Check if it's a cancellation exception
+                from gui.api_client import UploadCancelledException
+                if isinstance(e, UploadCancelledException) or self.upload_cancelled:
+                    self.logger.log("Upload cancelled by user", "INFO")
+                    self.root.after(0, lambda: self.step2.set_status("Upload cancelled"))
+                else:
+                    self.logger.log(f"❌ Upload error: {e}", "ERROR")
+                    self.step2.set_status("❌ Upload Error")
+                    self.show_alert("Error", f"Upload error: {e}", 'error')
             finally:
-                self.root.after(2000, lambda: self.step1.upload_progress_label.config(text=""))
-                self.root.after(2000, lambda: self.step2.progress_label.config(text=""))
+                self.upload_in_progress = False
+                # Re-enable upload button and browse functionality when upload finishes (success or error)
+                self.root.after(0, lambda: self.step1.set_upload_enabled(True))
+                self.root.after(0, lambda: self.step1.set_browse_enabled(True))
+                if not self.upload_cancelled:
+                    self.root.after(2000, lambda: self.step1.upload_progress_label.config(text=""))
+                    self.root.after(2000, lambda: self.step2.progress_label.config(text=""))
         
         threading.Thread(target=run_upload, daemon=True).start()
     
