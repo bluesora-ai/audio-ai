@@ -59,7 +59,7 @@ jobs:
         rm -rf build dist
         echo ""
         echo "Building macOS app bundle for Apple Silicon (ARM64)..."
-        arch -arm64 /opt/homebrew/bin/python3 -m PyInstaller AudioProvenanceGUI.spec --clean --noconfirm
+        arch -arm64 python3 -m PyInstaller AudioProvenanceGUI.spec --clean --noconfirm
         echo ""
         echo "Build completed"
         echo "Contents of dist/ after build:"
