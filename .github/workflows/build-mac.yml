@@ -24,9 +24,9 @@ jobs:
         cache: 'pip'
     
     - name: Install system dependencies
-      run: |
-        brew install ffmpeg libsndfile sox || true
-        echo "System dependencies installed"
+    run: |
+      brew install ffmpeg libsndfile sox portaudio || true
+      echo "System dependencies installed"
     
     - name: Install Python dependencies
       run: |
