@@ -135,6 +135,9 @@ if sys.platform == 'darwin':
                 'NSHighResolutionCapable': 'True',
             },
         )
+        print(f"[PyInstaller] sys.platform = {sys.platform}")
+        print(f"[PyInstaller] platform.system() = {platform.system()}")
+
 
         print(f"[PyInstaller] ✓ Successfully created app bundle using APP from namespace")
     except NameError as e:
