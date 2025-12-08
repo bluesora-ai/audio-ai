@@ -121,7 +121,7 @@ if system == 'Darwin':
     
     # On macOS, PyInstaller makes APP available in the spec namespace
     # Try to use it directly first (most common case)
-            try:
+    try:
         # APP should be in the namespace - use it directly
         print(f"[PyInstaller] Attempting to use APP from namespace...")
         app = APP(
