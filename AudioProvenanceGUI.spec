@@ -93,11 +93,23 @@ exe = EXE(
     upx=False,  # Disable UPX compression
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,  # On macOS, this creates .app bundle automatically
+    console=False,
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=icon_path,  # PyInstaller automatically handles .ico (Windows) and .icns (macOS)
+    icon=icon_path,
 )
+
+# On macOS, wrap EXE in APP to create .app bundle
+if system == 'Darwin':
+    app = APP(
+        exe,
+        name='AudioProvenanceGUI',
+        icon=icon_path,
+        info_plist={
+            'NSPrincipalClass': 'NSApplication',
+            'NSHighResolutionCapable': 'True',
+        },
+    )
