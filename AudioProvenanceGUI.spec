@@ -1,21 +1,16 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
 import platform
+import sys
 
-# Import APP from PyInstaller for macOS app bundle creation
-try:
-    from PyInstaller.building.api import APP
-except ImportError:
-    # Fallback for older PyInstaller versions
-    try:
-        from PyInstaller.building.build_main import APP
-    except ImportError:
-        APP = None
+# APP should be automatically available in PyInstaller spec namespace on macOS
+# But if it's not, we'll try to import it or access it from the namespace
+# Note: PyInstaller injects APP into the spec namespace when executing the spec file
+# So we check for it at runtime rather than importing at the top
 
 try:
     spec_dir = os.path.dirname(os.path.abspath(SPECPATH))
 except NameError:
-    import sys
     if hasattr(sys, '_MEIPASS'):
         spec_dir = os.path.dirname(sys.executable)
     else:
@@ -116,13 +111,44 @@ coll = COLLECT(
 )
 
 # On macOS, wrap COLLECT in APP to create .app bundle
-if system == 'Darwin' and APP is not None:
-    app = APP(
-        coll,
-        name='AudioProvenanceGUI',
-        icon=icon_path,
-        info_plist={
-            'NSPrincipalClass': 'NSApplication',
-            'NSHighResolutionCapable': 'True',
-        },
-    )
+# APP should be available in the spec namespace automatically on macOS
+# PyInstaller injects APP into the spec namespace when executing the spec file
+if system == 'Darwin':
+    # Try to get APP from the spec namespace first (PyInstaller should inject it)
+    # PyInstaller executes spec files with exec(code, spec_namespace), so APP should be in globals()
+    APP_class = globals().get('APP', None)
+    
+    # If not in namespace, try importing from PyInstaller modules
+    if APP_class is None:
+        try:
+            # Try BUNDLE from osx module (some PyInstaller versions use this)
+            from PyInstaller.building.osx import BUNDLE as APP_class
+        except (ImportError, AttributeError):
+            try:
+                # Try APP from api module
+                from PyInstaller.building.api import APP as APP_class
+            except (ImportError, AttributeError):
+                try:
+                    # Try APP from build_main module
+                    from PyInstaller.building.build_main import APP as APP_class
+                except (ImportError, AttributeError):
+                    APP_class = None
+    
+    # Create the .app bundle if APP is available
+    if APP_class is not None:
+        app = APP_class(
+            coll,
+            name='AudioProvenanceGUI',
+            icon=icon_path,
+            info_plist={
+                'NSPrincipalClass': 'NSApplication',
+                'NSHighResolutionCapable': 'True',
+            },
+        )
+    else:
+        # If APP is not available, PyInstaller might still create .app automatically
+        # with console=False on macOS, but it's not guaranteed
+        # In this case, we'll just have COLLECT which creates a directory structure
+        # Note: This might not create a proper .app bundle
+        print("[PyInstaller] WARNING: APP class not found. .app bundle may not be created properly.")
+        print("[PyInstaller] The build will continue with COLLECT only, which may not create a .app bundle.")
