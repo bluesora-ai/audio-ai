@@ -110,6 +110,7 @@ coll = COLLECT(
     name='AudioProvenanceGUI',
 )
 
+
 # On macOS, wrap COLLECT in APP to create .app bundle
 # APP should be available in the spec namespace automatically on macOS
 # PyInstaller injects APP into the spec namespace when executing the spec file
@@ -133,6 +134,9 @@ if system == 'Darwin':
                 'NSHighResolutionCapable': 'True',
             },
         )
+
+        coll = app
+
         print(f"[PyInstaller] ✓ Successfully created app bundle using APP from namespace")
     except NameError as e:
         print(f"[PyInstaller] APP not in namespace, trying explicit import...")
