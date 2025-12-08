@@ -114,7 +114,8 @@ coll = COLLECT(
 # On macOS, wrap COLLECT in APP to create .app bundle
 # APP should be available in the spec namespace automatically on macOS
 # PyInstaller injects APP into the spec namespace when executing the spec file
-if system == 'Darwin':
+if system in ('Darwin', 'macOS'):
+
     print(f"[PyInstaller] Platform detected: {system} (macOS)")
     print(f"[PyInstaller] Checking for APP class in namespace...")
     print(f"[PyInstaller] 'APP' in globals(): {'APP' in globals()}")
