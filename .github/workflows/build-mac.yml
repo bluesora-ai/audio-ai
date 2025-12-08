@@ -1,0 +1,91 @@
+name: Build macOS App
+
+on:
+  push:
+    branches: [ master, main ]
+    tags:
+      - 'v*'
+  pull_request:
+    branches: [ master, main ]
+  workflow_dispatch:  # Allow manual triggering
+
+jobs:
+  build-mac:
+    runs-on: macos-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+    
+    - name: Install system dependencies
+      run: |
+        brew install ffmpeg libsndfile sox || true
+        echo "System dependencies installed"
+    
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip setuptools wheel
+        pip install -r requirements.txt
+        pip install pyinstaller
+    
+    - name: Check for icon files
+      run: |
+        if [ -f "icon.icns" ]; then
+          echo "✓ Found icon.icns (preferred for macOS)"
+        else
+          echo "⚠ icon.icns not found"
+        fi
+        if [ -f "icon.ico" ]; then
+          echo "✓ Found icon.ico (fallback)"
+        else
+          echo "⚠ icon.ico not found"
+        fi
+        if [ ! -f "icon.icns" ] && [ ! -f "icon.ico" ]; then
+          echo "⚠ No icon files found - app will build without icon"
+        fi
+    
+    - name: Build macOS app with PyInstaller
+      run: |
+        pyinstaller AudioProvenanceGUI.spec --clean --noconfirm
+        echo "Build completed"
+    
+    - name: Verify app bundle
+      run: |
+        if [ -d "dist/AudioProvenanceGUI.app" ]; then
+          echo "✓ App bundle created successfully"
+          echo ""
+          echo "App bundle structure:"
+          ls -lh dist/AudioProvenanceGUI.app/Contents/
+          echo ""
+          echo "Executable location:"
+          find dist/AudioProvenanceGUI.app -type f -name "AudioProvenanceGUI" | head -1
+        else
+          echo "✗ App bundle not found!"
+          echo "Contents of dist/:"
+          ls -la dist/
+          exit 1
+        fi
+    
+    - name: Upload app bundle artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: AudioProvenanceGUI-macOS
+        path: dist/AudioProvenanceGUI.app
+        retention-days: 30
+        if-no-files-found: error
+    
+    - name: Upload build logs (on failure)
+      uses: actions/upload-artifact@v4
+      if: failure()
+      with:
+        name: build-logs-macOS
+        path: |
+          build/
+        retention-days: 7
+

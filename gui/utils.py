@@ -64,6 +64,12 @@ class Logger:
 
 def apply_dark_title_bar(root: tk.Tk):
     """Apply dark/black title bar and rounded corners (Windows-specific)."""
+    import platform
+    
+    # Only apply on Windows
+    if platform.system() != 'Windows':
+        return
+    
     try:
         import ctypes
         
@@ -112,7 +118,7 @@ def apply_dark_title_bar(root: tk.Tk):
 
 def set_window_icon(root: tk.Tk, icon_path: Optional[str] = None):
     """
-    Set window icon with Windows API support.
+    Set window icon with cross-platform support (Windows/Mac).
     
     Args:
         root: Root Tkinter window
@@ -121,29 +127,52 @@ def set_window_icon(root: tk.Tk, icon_path: Optional[str] = None):
     try:
         from pathlib import Path
         import sys
+        import platform
+        
+        system = platform.system()
         
         if icon_path is None:
-            # Try to find icon.ico in multiple locations
+            # Try to find icon file in multiple locations
             possible_paths = []
+            
+            # Determine icon extension based on platform
+            icon_ext = '.icns' if system == 'Darwin' else '.ico'
             
             # 1. If running from PyInstaller bundle, look in bundle directory
             if hasattr(sys, '_MEIPASS'):
                 bundle_dir = Path(sys._MEIPASS)
-                possible_paths.append(bundle_dir / "icon.ico")
+                possible_paths.append(bundle_dir / f"icon{icon_ext}")
+                possible_paths.append(bundle_dir / "icon.ico")  # Fallback
+                possible_paths.append(bundle_dir / "icon.icns")  # Fallback
                 # Also try in root of bundle
-                possible_paths.append(bundle_dir.parent / "icon.ico" if bundle_dir.parent else None)
+                if bundle_dir.parent:
+                    possible_paths.append(bundle_dir.parent / f"icon{icon_ext}")
+                    possible_paths.append(bundle_dir.parent / "icon.ico")
+                    possible_paths.append(bundle_dir.parent / "icon.icns")
             
-            # 2. Try next to the executable (for bundled exe)
+            # 2. Try next to the executable (for bundled exe/app)
             if hasattr(sys, 'executable') and sys.executable:
                 exe_dir = Path(sys.executable).parent
-                possible_paths.append(exe_dir / "icon.ico")
+                possible_paths.append(exe_dir / f"icon{icon_ext}")
+                possible_paths.append(exe_dir / "icon.ico")  # Fallback
+                possible_paths.append(exe_dir / "icon.icns")  # Fallback
+                # For macOS .app bundles, also check Contents/Resources
+                if system == 'Darwin' and exe_dir.name == 'MacOS':
+                    resources_dir = exe_dir.parent.parent / "Resources"
+                    possible_paths.append(resources_dir / f"icon{icon_ext}")
+                    possible_paths.append(resources_dir / "icon.ico")
+                    possible_paths.append(resources_dir / "icon.icns")
             
             # 3. Try in project directory (for development)
             script_dir = Path(__file__).parent.parent.absolute()
-            possible_paths.append(script_dir / "icon.ico")
+            possible_paths.append(script_dir / f"icon{icon_ext}")
+            possible_paths.append(script_dir / "icon.ico")  # Fallback
+            possible_paths.append(script_dir / "icon.icns")  # Fallback
             
             # 4. Try current working directory
-            possible_paths.append(Path.cwd() / "icon.ico")
+            possible_paths.append(Path.cwd() / f"icon{icon_ext}")
+            possible_paths.append(Path.cwd() / "icon.ico")  # Fallback
+            possible_paths.append(Path.cwd() / "icon.icns")  # Fallback
             
             # Find first existing icon file
             icon_path = None
@@ -152,7 +181,9 @@ def set_window_icon(root: tk.Tk, icon_path: Optional[str] = None):
                     icon_path = str(path)
                     break
         
-        # Use Windows API for taskbar and titlebar icon support
+        # Platform-specific icon handling
+        if system == 'Windows':
+            # Windows-specific icon handling
         try:
             import ctypes
             
@@ -172,7 +203,7 @@ def set_window_icon(root: tk.Tk, icon_path: Optional[str] = None):
             hicon_small = 0
             hicon_large = 0
             
-            # Try to load from file path first (if icon file was found)
+                # Try to load from file path first
             if icon_path and Path(icon_path).exists():
                 try:
                     # Set icon using iconbitmap (for titlebar)
@@ -180,7 +211,8 @@ def set_window_icon(root: tk.Tk, icon_path: Optional[str] = None):
                 except Exception:
                     pass
                 
-                # Load icon using Windows API
+                    # Load icon using Windows API (only works with .ico files)
+                    if icon_path.lower().endswith('.ico'):
                 abs_path_wide = ctypes.create_unicode_buffer(icon_path)
                 hicon_small = ctypes.windll.user32.LoadImageW(
                     0, abs_path_wide, IMAGE_ICON, 16, 16, LR_LOADFROMFILE
@@ -199,7 +231,6 @@ def set_window_icon(root: tk.Tk, icon_path: Optional[str] = None):
                     hicon_large = ctypes.windll.user32.LoadImageW(
                         0, exe_path_wide, IMAGE_ICON, 32, 32, LR_LOADFROMFILE | LR_DEFAULTSIZE
                     )
-                    # If we loaded from EXE, use that as the icon_path for return value
                     if hicon_small or hicon_large:
                         icon_path = sys.executable
             
@@ -213,6 +244,39 @@ def set_window_icon(root: tk.Tk, icon_path: Optional[str] = None):
                     ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, hicon_small)
                 if hicon_large:
                     ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, hicon_large)
+            except Exception:
+                pass
+        
+        elif system == 'Darwin':  # macOS
+            # macOS icon handling
+            if icon_path and Path(icon_path).exists():
+                try:
+                    # On macOS, use iconbitmap with .icns file (preferred) or .ico
+                    root.iconbitmap(icon_path)
+                except Exception:
+                    # Fallback: try the other format
+                    if icon_path.endswith('.icns'):
+                        ico_path = icon_path.replace('.icns', '.ico')
+                        if Path(ico_path).exists():
+                            try:
+                                root.iconbitmap(ico_path)
+                                icon_path = ico_path
+                            except Exception:
+                                pass
+                    elif icon_path.endswith('.ico'):
+                        icns_path = icon_path.replace('.ico', '.icns')
+                        if Path(icns_path).exists():
+                            try:
+                                root.iconbitmap(icns_path)
+                                icon_path = icns_path
+                            except Exception:
+                                pass
+        
+        else:  # Linux and other platforms
+            # Linux/Unix icon handling
+            if icon_path and Path(icon_path).exists():
+                try:
+                    root.iconbitmap(icon_path)
         except Exception:
             pass
         

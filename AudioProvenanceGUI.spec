@@ -1,5 +1,6 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
+import platform
 
 try:
     spec_dir = os.path.dirname(os.path.abspath(SPECPATH))
@@ -10,12 +11,25 @@ except NameError:
     else:
         spec_dir = os.path.dirname(os.path.abspath(__file__)) if '__file__' in globals() else os.getcwd()
 
-# Find icon.ico file - try multiple locations
+# Find icon file - try multiple locations and formats (cross-platform)
 icon_path = None
+system = platform.system()
+
+# Determine icon extension based on platform (prefer platform-specific, fallback to other)
+icon_ext = '.icns' if system == 'Darwin' else '.ico'
 possible_paths = [
-    os.path.abspath(os.path.join(spec_dir, 'icon.ico')),  # Next to spec file
-    os.path.abspath('icon.ico'),  # Current working directory
-    os.path.join(os.getcwd(), 'icon.ico'),  # Explicit current directory
+    # Platform-specific icon first
+    os.path.abspath(os.path.join(spec_dir, f'icon{icon_ext}')),
+    # Fallback to other formats
+    os.path.abspath(os.path.join(spec_dir, 'icon.ico')),
+    os.path.abspath(os.path.join(spec_dir, 'icon.icns')),
+    # Current working directory
+    os.path.abspath(f'icon{icon_ext}'),
+    os.path.abspath('icon.ico'),
+    os.path.abspath('icon.icns'),
+    os.path.join(os.getcwd(), f'icon{icon_ext}'),
+    os.path.join(os.getcwd(), 'icon.ico'),
+    os.path.join(os.getcwd(), 'icon.icns'),
 ]
 
 for path in possible_paths:
@@ -23,20 +37,39 @@ for path in possible_paths:
         icon_path = os.path.abspath(path)
         break
 
+# Also include both icon files in datas for runtime access
+icon_datas = []
+if icon_path and os.path.exists(icon_path):
+    icon_datas.append((icon_path, '.'))
+# Also include the other icon format if it exists
+other_icon_ext = '.icns' if icon_ext == '.ico' else '.ico'
+other_icon_paths = [
+    os.path.abspath(os.path.join(spec_dir, f'icon{other_icon_ext}')),
+    os.path.abspath(f'icon{other_icon_ext}'),
+    os.path.join(os.getcwd(), f'icon{other_icon_ext}'),
+]
+for path in other_icon_paths:
+    if os.path.exists(path) and path != icon_path:
+        icon_datas.append((path, '.'))
+        break
+
 # Debug output during build
 if 'SPECPATH' in globals() or '__file__' in globals():
     if icon_path:
         print(f"[PyInstaller] Icon path: {icon_path}")
         print(f"[PyInstaller] Icon exists: {os.path.exists(icon_path)}")
+        print(f"[PyInstaller] Platform: {system}")
+        if len(icon_datas) > 1:
+            print(f"[PyInstaller] Including both icon formats for cross-platform support")
     else:
-        print(f"[PyInstaller] WARNING: icon.ico not found! Icon will not be embedded.")
+        print(f"[PyInstaller] WARNING: icon file not found! Icon will not be embedded.")
         print(f"[PyInstaller] Searched in: {possible_paths}")
 
 a = Analysis(
     ['run_gui.py'],
     pathex=[],
     binaries=[],
-    datas=[(icon_path, '.')] if icon_path and os.path.exists(icon_path) else [],  # Include icon.ico in bundle for runtime access
+    datas=icon_datas,  # Include icon files in bundle for runtime access
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
@@ -57,14 +90,14 @@ exe = EXE(
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=False,  # Disable UPX compression - it can corrupt embedded icons
+    upx=False,  # Disable UPX compression
     upx_exclude=[],
     runtime_tmpdir=None,
-    console=False,
+    console=False,  # On macOS, this creates .app bundle automatically
     disable_windowed_traceback=False,
     argv_emulation=False,
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon=icon_path,  # Embed icon in exe - must be absolute path
+    icon=icon_path,  # PyInstaller automatically handles .ico (Windows) and .icns (macOS)
 )
