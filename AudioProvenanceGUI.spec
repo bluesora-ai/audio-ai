@@ -98,7 +98,7 @@ exe = EXE(
     console=False,  # Windowed mode
     icon=icon_path,
 )
-
+from PyInstaller.building.osx import BUNDLE as APP
 coll = COLLECT(
     exe,
     a.binaries,
@@ -111,9 +111,6 @@ coll = COLLECT(
 )
 
 
-# On macOS, wrap COLLECT in APP to create .app bundle
-# APP should be available in the spec namespace automatically on macOS
-# PyInstaller injects APP into the spec namespace when executing the spec file
 if sys.platform == 'darwin':
 
     print(f"[PyInstaller] Platform detected: {system} (macOS)")
@@ -121,14 +118,11 @@ if sys.platform == 'darwin':
     print(f"[PyInstaller] 'APP' in globals(): {'APP' in globals()}")
     print(f"[PyInstaller] 'APP' in dir(): {'APP' in dir()}")
     
-    # On macOS, PyInstaller makes APP available in the spec namespace
-    # Try to use it directly first (most common case)
     try:
-        # APP should be in the namespace - use it directly
         print(f"[PyInstaller] Attempting to use APP from namespace...")
         coll = APP(
             coll,
-            name='AudioProvenanceGUI.app',
+            name='AudioProvenanceGUI',
             icon=icon_path,
             info_plist={
                 'NSPrincipalClass': 'NSApplication',
