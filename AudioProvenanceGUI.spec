@@ -83,29 +83,32 @@ pyz = PYZ(a.pure)
 exe = EXE(
     pyz,
     a.scripts,
-    a.binaries,
-    a.datas,
     [],
+    exclude_binaries=True,  # Changed: exclude binaries from EXE
     name='AudioProvenanceGUI',
     debug=False,
     bootloader_ignore_signals=False,
     strip=False,
-    upx=False,  # Disable UPX compression
-    upx_exclude=[],
-    runtime_tmpdir=None,
-    console=False,
-    disable_windowed_traceback=False,
-    argv_emulation=False,
-    target_arch=None,
-    codesign_identity=None,
-    entitlements_file=None,
+    upx=False,
+    console=False,  # Windowed mode
     icon=icon_path,
 )
 
-# On macOS, wrap EXE in APP to create .app bundle
+coll = COLLECT(
+    exe,
+    a.binaries,
+    a.zipfiles,
+    a.datas,
+    strip=False,
+    upx=False,
+    upx_exclude=[],
+    name='AudioProvenanceGUI',
+)
+
+# On macOS, wrap COLLECT in APP to create .app bundle
 if system == 'Darwin':
     app = APP(
-        exe,
+        coll,
         name='AudioProvenanceGUI',
         icon=icon_path,
         info_plist={
