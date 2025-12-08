@@ -122,7 +122,7 @@ if sys.platform == 'darwin':
         print(f"[PyInstaller] Attempting to use APP from namespace...")
         coll = APP(
             coll,
-            name='AudioProvenanceGUI',
+            name='AudioProvenanceGUI.app',
             icon=icon_path,
             info_plist={
                 'NSPrincipalClass': 'NSApplication',
