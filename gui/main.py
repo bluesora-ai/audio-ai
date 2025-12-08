@@ -31,60 +31,99 @@ class BeatlibraryProvenanceApp:
         Args:
             root: Root Tkinter window
         """
-        self.root = root
-        self.root.title(WINDOW_TITLE)
-        self.root.geometry(WINDOW_SIZE)
-        self.root.minsize(*WINDOW_MIN_SIZE)
-        self.root.configure(bg=COLOR_BG_DARK)
+        import sys
+        import traceback
         
-        # Set icon
-        self.icon_path = set_window_icon(root)
-        
-        # Configure root grid
-        self.root.grid_rowconfigure(0, weight=1)
-        self.root.grid_columnconfigure(0, weight=1)
-        
-        # Setup theme
-        setup_dark_theme()
-        
-        # State
-        self.job_id: Optional[str] = None
-        self.report: Optional[Dict] = None
-        self.viz_generated = False
-        self.current_step = 1
-        self.drag_start_x = 0
-        self.drag_start_y = 0
-        self.upload_cancelled = False
-        self.upload_in_progress = False
-        
-        # API client
-        self.url_var = tk.StringVar(value=BASE_URL)
-        self.api_client = APIClient(BASE_URL)
-        
-        # Components
-        self.step1 = None
-        self.step2 = None
-        self.step3 = None
-        self.logger = None
-        self.report_displayer = None
-        self.chart_generator = None
-        
-        # UI elements
-        self.step_container = None
-        self.progress_circles = []
-        self.progress_texts = []
-        self.prev_btn = None
-        self.next_btn = None
-        
-        # Setup UI
-        self._setup_ui()
-        
-        # Apply dark title bar after window is shown
-        self.root.after(100, lambda: apply_dark_title_bar(self.root))
-        
-        # Re-apply icon
-        if self.icon_path:
-            self.root.after(300, lambda: set_window_icon(self.root, self.icon_path))
+        try:
+            self.root = root
+            self.root.title(WINDOW_TITLE)
+            self.root.geometry(WINDOW_SIZE)
+            self.root.minsize(*WINDOW_MIN_SIZE)
+            self.root.configure(bg=COLOR_BG_DARK)
+            
+            # Set icon
+            try:
+                self.icon_path = set_window_icon(root)
+            except Exception as e:
+                # Icon setting is not critical, continue without it
+                self.icon_path = None
+                print(f"Warning: Could not set icon: {e}")
+            
+            # Configure root grid
+            self.root.grid_rowconfigure(0, weight=1)
+            self.root.grid_columnconfigure(0, weight=1)
+            
+            # Setup theme
+            try:
+                setup_dark_theme()
+            except Exception as e:
+                print(f"Warning: Could not setup theme: {e}")
+            
+            # State
+            self.job_id: Optional[str] = None
+            self.report: Optional[Dict] = None
+            self.viz_generated = False
+            self.current_step = 1
+            self.drag_start_x = 0
+            self.drag_start_y = 0
+            self.upload_cancelled = False
+            self.upload_in_progress = False
+            
+            # API client
+            self.url_var = tk.StringVar(value=BASE_URL)
+            try:
+                self.api_client = APIClient(BASE_URL)
+            except Exception as e:
+                print(f"Warning: Could not initialize API client: {e}")
+                raise
+            
+            # Components
+            self.step1 = None
+            self.step2 = None
+            self.step3 = None
+            self.logger = None
+            self.report_displayer = None
+            self.chart_generator = None
+            
+            # UI elements
+            self.step_container = None
+            self.progress_circles = []
+            self.progress_texts = []
+            self.prev_btn = None
+            self.next_btn = None
+            
+            # Setup UI
+            self._setup_ui()
+            
+            # Apply dark title bar after window is shown
+            self.root.after(100, lambda: apply_dark_title_bar(self.root))
+            
+            # Re-apply icon
+            if self.icon_path:
+                self.root.after(300, lambda: set_window_icon(self.root, self.icon_path))
+        except Exception as e:
+            # Log initialization error
+            error_msg = f"Error in BeatlibraryProvenanceApp.__init__:\n{traceback.format_exc()}"
+            try:
+                from pathlib import Path
+                log_dir = Path.home() / "Library" / "Logs" / "AudioProvenanceGUI"
+                if sys.platform != 'darwin':
+                    log_dir = Path(__file__).parent.parent / "logs"
+                
+                log_dir.mkdir(parents=True, exist_ok=True)
+                log_file = log_dir / "error.log"
+                
+                with open(log_file, 'a', encoding='utf-8') as f:
+                    from datetime import datetime
+                    f.write(f"\n{'='*80}\n")
+                    f.write(f"Init error at {datetime.now().isoformat()}\n")
+                    f.write(f"{'='*80}\n")
+                    f.write(error_msg)
+                    f.write(f"\n{'='*80}\n\n")
+            except Exception:
+                pass
+            
+            raise
     
     def _setup_ui(self):
         """Setup wizard-style step-by-step interface."""
@@ -698,9 +737,49 @@ class BeatlibraryProvenanceApp:
 
 def main():
     """Run the Beatlibrary Provenance application."""
-    root = tk.Tk()
-    app = BeatlibraryProvenanceApp(root)
-    root.mainloop()
+    import sys
+    import traceback
+    from pathlib import Path
+    
+    root = None
+    try:
+        root = tk.Tk()
+        app = BeatlibraryProvenanceApp(root)
+        root.mainloop()
+    except Exception as e:
+        # Log error to file
+        log_dir = Path.home() / "Library" / "Logs" / "AudioProvenanceGUI"
+        if sys.platform != 'darwin':
+            log_dir = Path(__file__).parent.parent / "logs"
+        
+        log_dir.mkdir(parents=True, exist_ok=True)
+        log_file = log_dir / "error.log"
+        
+        error_msg = f"Error in main():\n{traceback.format_exc()}"
+        try:
+            with open(log_file, 'a', encoding='utf-8') as f:
+                from datetime import datetime
+                f.write(f"\n{'='*80}\n")
+                f.write(f"Error at {datetime.now().isoformat()}\n")
+                f.write(f"{'='*80}\n")
+                f.write(error_msg)
+                f.write(f"\n{'='*80}\n\n")
+        except Exception:
+            pass
+        
+        # Try to show error if window exists
+        if root:
+            try:
+                from tkinter import messagebox
+                messagebox.showerror(
+                    "Application Error",
+                    f"An error occurred:\n\n{str(e)}\n\n"
+                    f"Check log: {log_file}"
+                )
+            except Exception:
+                pass
+        
+        raise
 
 
 if __name__ == "__main__":

@@ -75,7 +75,19 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=icon_datas,  # Include icon files in bundle for runtime access
-    hiddenimports=[],
+    hiddenimports=[
+        'tkinter',
+        'tkinter.ttk',
+        'tkinter.filedialog',
+        'tkinter.scrolledtext',
+        'requests',
+        'numpy',
+        'matplotlib',
+        'matplotlib.backends.backend_tkagg',
+        'matplotlib.figure',
+        'matplotlib.pyplot',
+        'PIL._tkinter_finder',  # For PIL/Pillow if used
+    ],
     hookspath=[],
     hooksconfig={},
     runtime_hooks=[],
