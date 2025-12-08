@@ -52,8 +52,18 @@ jobs:
     
     - name: Build macOS app with PyInstaller
       run: |
+        echo "PyInstaller version:"
+        pyinstaller --version
+        echo ""
+        echo "Cleaning previous builds..."
+        rm -rf build dist
+        echo ""
+        echo "Building macOS app bundle..."
         pyinstaller AudioProvenanceGUI.spec --clean --noconfirm
+        echo ""
         echo "Build completed"
+        echo "Contents of dist/ after build:"
+        ls -la dist/
     
     - name: Verify app bundle
       run: |
