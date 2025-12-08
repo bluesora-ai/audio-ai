@@ -64,7 +64,20 @@ jobs:
         echo "Build completed"
         echo "Contents of dist/ after build:"
         ls -la dist/
-    
+    - name: Install dmgbuild
+      run: |
+        pip install dmgbuild
+    - name: Package .app into DMG
+      run: |
+        dmgbuild -s /dev/null "AudioProvenanceGUI" dist/AudioProvenanceGUI.dmg \
+          --source dist/AudioProvenanceGUI.app
+    - name: Upload DMG artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: AudioProvenanceGUI-dmg
+        path: dist/AudioProvenanceGUI.dmg
+        retention-days: 30
+
     - name: Verify app bundle
       run: |
         if [ -d "dist/AudioProvenanceGUI.app" ]; then
