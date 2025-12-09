@@ -443,6 +443,19 @@ class ProvenanceReportBuilder:
             D = librosa_module.stft(audio)
             S_db = librosa_module.amplitude_to_db(np.abs(D), ref=np.max)
             
+            # Remove any singleton dimensions to ensure 2D array for matplotlib
+            # This fixes the error: "A should have shape (24000, 1025) not (24000, 1025, 1)"
+            S_db = np.squeeze(S_db)
+            
+            # Ensure it's 2D (handle edge cases)
+            if S_db.ndim != 2:
+                if S_db.ndim == 1:
+                    # Reshape 1D to 2D if needed
+                    S_db = S_db.reshape(-1, 1)
+                elif S_db.ndim > 2:
+                    # Take first slice if 3D+
+                    S_db = S_db[:, :, 0] if S_db.shape[2] == 1 else S_db.reshape(S_db.shape[0], -1)
+            
             # Plot
             plt.figure(figsize=(10, 4))
             try:
