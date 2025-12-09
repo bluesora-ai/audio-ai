@@ -1,6 +1,7 @@
 """API client for communicating with the Audio Provenance API."""
 import requests
 import time
+import os
 from pathlib import Path
 from typing import Optional, Dict, Callable
 from .constants import TIMEOUT, CONNECT_TIMEOUT, MAX_WAIT, BASE_UPLOAD_TIMEOUT, UPLOAD_TIMEOUT_PER_MB, MAX_UPLOAD_TIMEOUT
@@ -22,6 +23,17 @@ class APIClient:
             base_url: Base URL of the API server
         """
         self.base_url = base_url.rstrip('/')
+        # Create a session with proxies explicitly disabled
+        # This ensures all requests go directly without using system proxy settings
+        # trust_env=False prevents requests from reading HTTP_PROXY/HTTPS_PROXY env vars
+        self.session = requests.Session()
+        self.session.proxies = {'http': None, 'https': None}
+        self.session.trust_env = False  # Don't trust environment proxy variables
+        
+        # Also clear proxy env vars for this session to be extra safe
+        # (This only affects this process, not the system)
+        for env_var in ['HTTP_PROXY', 'HTTPS_PROXY', 'http_proxy', 'https_proxy', 'ALL_PROXY', 'all_proxy']:
+            os.environ.pop(env_var, None)
     
     def test_health(self) -> Dict:
         """
@@ -30,7 +42,10 @@ class APIClient:
         Returns:
             Response data as dictionary
         """
-        response = requests.get(f"{self.base_url}/health", timeout=CONNECT_TIMEOUT)
+        response = self.session.get(
+            f"{self.base_url}/health", 
+            timeout=CONNECT_TIMEOUT
+        )
         response.raise_for_status()
         return response.json()
     
@@ -80,7 +95,7 @@ class APIClient:
                 if cancellation_check and cancellation_check():
                     raise UploadCancelledException("Upload cancelled by user")
                 
-                response = requests.post(
+                response = self.session.post(
                     f"{self.base_url}/api/v1/provenance-check",
                     data=monitor,
                     headers=headers,
@@ -89,7 +104,7 @@ class APIClient:
             
             # Check for cancellation after request completes
             if cancellation_check and cancellation_check():
-                raise CancelledException("Upload cancelled by user")
+                raise UploadCancelledException("Upload cancelled by user")
             
             # Final progress update
             if progress_callback:
@@ -145,7 +160,7 @@ class APIClient:
             if cancellation_check and cancellation_check():
                 raise UploadCancelledException("Upload cancelled by user")
             
-            response = requests.post(
+            response = self.session.post(
                 f"{self.base_url}/api/v1/provenance-check",
                 data=data,
                 headers=headers,
@@ -177,7 +192,7 @@ class APIClient:
         Returns:
             Status data as dictionary
         """
-        response = requests.get(
+        response = self.session.get(
             f"{self.base_url}/api/v1/status/{job_id}",
             timeout=CONNECT_TIMEOUT
         )
@@ -194,7 +209,7 @@ class APIClient:
         Returns:
             Report data as dictionary
         """
-        response = requests.get(
+        response = self.session.get(
             f"{self.base_url}/api/v1/reports/{job_id}",
             timeout=TIMEOUT
         )

@@ -15,7 +15,7 @@ SAMPLE_RATE = 44100
 EMBEDDING_DIM = 512
 
 # Embedding model settings (Research Paper Requirements)
-EMBEDDING_MODEL_TYPE = "auto"  # "mert", "muq", "openl3", "auto" (auto tries MERT > MuQ > OpenL3)
+EMBEDDING_MODEL_TYPE = "mert"  # "mert", "muq", "openl3", "auto" (auto tries MERT > MuQ > OpenL3)
 MERT_MODEL_NAME = "m-a-p/MERT-v1-330M"  # MERT model from Hugging Face
 USE_HARD_NEGATIVE_MINING = True  # Enable hard negative mining for contrastive learning
 NUM_HARD_NEGATIVES = 5  # Number of hard negatives per anchor

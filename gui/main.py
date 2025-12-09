@@ -398,15 +398,6 @@ class BeatlibraryProvenanceApp:
             MAX_UPLOAD_TIMEOUT
         )
         
-        if file_size_mb > 50:
-            if not self.show_confirm(
-                "Large File Warning",
-                f"File size: {file_size_mb:.1f} MB\n"
-                f"Estimated processing time: {dynamic_timeout // 60} minutes\n\n"
-                f"Large files may take longer to process.\nContinue?"
-            ):
-                return
-        
         # Disable upload button and browse functionality when upload starts
         self.step1.set_upload_enabled(False)
         self.step1.set_browse_enabled(False)

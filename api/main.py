@@ -19,7 +19,9 @@ from config.settings import (
     EMBEDDING_MODEL_PATH,
     SEGMENT_LENGTH,
     SAMPLE_RATE,
-    EMBEDDING_DIM
+    EMBEDDING_DIM,
+    EMBEDDING_MODEL_TYPE,
+    MERT_MODEL_NAME
 )
 
 logging.basicConfig(level=logging.INFO)
@@ -62,7 +64,19 @@ logger.info(f"Index exists: {FAISS_INDEX_PATH.exists()}")
 logger.info(f"Metadata exists: {FAISS_METADATA_PATH.exists()}")
 
 # Calculate model and index hashes for provenance
-model_hash = calculate_file_hash(EMBEDDING_MODEL_PATH) if EMBEDDING_MODEL_PATH else None
+# For MERT, we use the model identifier since it's loaded from Hugging Face, not a local file
+if EMBEDDING_MODEL_PATH and EMBEDDING_MODEL_PATH.exists():
+    model_hash = calculate_file_hash(EMBEDDING_MODEL_PATH)
+elif EMBEDDING_MODEL_TYPE == "mert":
+    # Calculate hash from MERT model identifier for provenance tracking
+    import hashlib
+    model_identifier = f"{EMBEDDING_MODEL_TYPE}:{MERT_MODEL_NAME}"
+    model_hash = hashlib.sha256(model_identifier.encode()).hexdigest()[:16]
+    logger.info(f"Using MERT model identifier for hash: {MERT_MODEL_NAME}")
+    logger.info(f"Model checksum (from identifier): {model_hash}")
+else:
+    model_hash = None
+
 index_hash = calculate_file_hash(FAISS_INDEX_PATH) if FAISS_INDEX_PATH.exists() else None
 
 orchestrator = PipelineOrchestrator(

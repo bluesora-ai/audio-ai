@@ -8,6 +8,12 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+# Try to import config for MERT model name
+try:
+    from config.settings import MERT_MODEL_NAME
+except ImportError:
+    MERT_MODEL_NAME = "m-a-p/MERT-v1-330M"  # Default fallback
+
 # Lazy imports for torch to avoid DLL errors on Windows
 HAS_TORCH = False
 HAS_TORCHAUDIO = False
@@ -129,13 +135,22 @@ class EmbeddingGenerator:
         
         try:
             # MERT model on Hugging Face
-            # Try different MERT model variants
+            # Try configured model first, then fallback variants
             model_names = [
-                "m-a-p/MERT-v1-330M",  # MERT v1 330M parameters
-                "m-a-p/MERT-v1-95M",   # MERT v1 95M parameters
+                MERT_MODEL_NAME,  # Use configured model name from settings
+                "m-a-p/MERT-v1-330M",  # MERT v1 330M parameters (fallback)
+                "m-a-p/MERT-v1-95M",   # MERT v1 95M parameters (fallback)
             ]
             
-            for model_name in model_names:
+            # Remove duplicates while preserving order
+            seen = set()
+            unique_model_names = []
+            for name in model_names:
+                if name not in seen:
+                    seen.add(name)
+                    unique_model_names.append(name)
+            
+            for model_name in unique_model_names:
                 try:
                     logger.info(f"Attempting to load MERT model: {model_name}")
                     self.mert_model = AutoModel.from_pretrained(model_name, trust_remote_code=True)
@@ -151,12 +166,13 @@ class EmbeddingGenerator:
                     if mert_sr:
                         logger.info(f"MERT model requires sampling rate: {mert_sr} Hz")
                     
-                    logger.info(f"Successfully loaded MERT model: {model_name}")
+                    logger.info(f"✅ Successfully loaded MERT model: {model_name}")
                     return True
                 except Exception as e:
                     logger.debug(f"Failed to load {model_name}: {e}")
                     continue
             
+            logger.error("❌ Failed to load any MERT model variant")
             return False
         except Exception as e:
             logger.warning(f"Error loading MERT: {e}")

@@ -12,6 +12,7 @@ from src.stage4_indexing import FAISSIndexer
 from src.stage5_classifier import AIDetector
 from src.stage6_reporting import ProvenanceReportBuilder
 from src.utils.performance_tracker import PerformanceTracker
+from config.settings import EMBEDDING_MODEL_TYPE
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -56,7 +57,8 @@ class PipelineOrchestrator:
         self.stem_separator = StemSeparator(sample_rate=sample_rate)
         self.embedder = EmbeddingGenerator(
             embedding_dim=embedding_dim,
-            sample_rate=sample_rate
+            sample_rate=sample_rate,
+            model_type=EMBEDDING_MODEL_TYPE
         )
         
         # Load FAISS index

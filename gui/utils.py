@@ -184,66 +184,66 @@ def set_window_icon(root: tk.Tk, icon_path: Optional[str] = None):
         # Platform-specific icon handling
         if system == 'Windows':
             # Windows-specific icon handling
-        try:
-            import ctypes
-            
-            # Get window handle
             try:
-                hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
-                if hwnd == 0:
-                    hwnd = root.winfo_id()
-            except:
-                hwnd = root.winfo_id()
-            
-            # Load icon using Windows API
-            IMAGE_ICON = 1
-            LR_LOADFROMFILE = 0x0010
-            LR_DEFAULTSIZE = 0x0040
-            
-            hicon_small = 0
-            hicon_large = 0
-            
-                # Try to load from file path first
-            if icon_path and Path(icon_path).exists():
-                try:
-                    # Set icon using iconbitmap (for titlebar)
-                    root.iconbitmap(icon_path)
-                except Exception:
-                    pass
+                import ctypes
                 
+                # Get window handle
+                try:
+                    hwnd = ctypes.windll.user32.GetParent(root.winfo_id())
+                    if hwnd == 0:
+                        hwnd = root.winfo_id()
+                except:
+                    hwnd = root.winfo_id()
+                
+                # Load icon using Windows API
+                IMAGE_ICON = 1
+                LR_LOADFROMFILE = 0x0010
+                LR_DEFAULTSIZE = 0x0040
+                
+                hicon_small = 0
+                hicon_large = 0
+                
+                # Try to load from file path first
+                if icon_path and Path(icon_path).exists():
+                    try:
+                        # Set icon using iconbitmap (for titlebar)
+                        root.iconbitmap(icon_path)
+                    except Exception:
+                        pass
+                    
                     # Load icon using Windows API (only works with .ico files)
                     if icon_path.lower().endswith('.ico'):
-                abs_path_wide = ctypes.create_unicode_buffer(icon_path)
-                hicon_small = ctypes.windll.user32.LoadImageW(
-                    0, abs_path_wide, IMAGE_ICON, 16, 16, LR_LOADFROMFILE
-                )
-                hicon_large = ctypes.windll.user32.LoadImageW(
-                    0, abs_path_wide, IMAGE_ICON, 32, 32, LR_LOADFROMFILE
-                )
-            
-            # If loading from file failed or file not found, try loading from EXE (embedded icon)
-            if not hicon_small or not hicon_large:
-                if hasattr(sys, 'executable') and sys.executable and Path(sys.executable).exists():
-                    exe_path_wide = ctypes.create_unicode_buffer(sys.executable)
-                    hicon_small = ctypes.windll.user32.LoadImageW(
-                        0, exe_path_wide, IMAGE_ICON, 16, 16, LR_LOADFROMFILE | LR_DEFAULTSIZE
-                    )
-                    hicon_large = ctypes.windll.user32.LoadImageW(
-                        0, exe_path_wide, IMAGE_ICON, 32, 32, LR_LOADFROMFILE | LR_DEFAULTSIZE
-                    )
-                    if hicon_small or hicon_large:
-                        icon_path = sys.executable
-            
-            # Set icons
-            if hicon_small or hicon_large:
-                WM_SETICON = 0x0080
-                ICON_SMALL = 0
-                ICON_BIG = 1
+                        abs_path_wide = ctypes.create_unicode_buffer(icon_path)
+                        hicon_small = ctypes.windll.user32.LoadImageW(
+                            0, abs_path_wide, IMAGE_ICON, 16, 16, LR_LOADFROMFILE
+                        )
+                        hicon_large = ctypes.windll.user32.LoadImageW(
+                            0, abs_path_wide, IMAGE_ICON, 32, 32, LR_LOADFROMFILE
+                        )
                 
-                if hicon_small:
-                    ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, hicon_small)
-                if hicon_large:
-                    ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, hicon_large)
+                # If loading from file failed or file not found, try loading from EXE (embedded icon)
+                if not hicon_small or not hicon_large:
+                    if hasattr(sys, 'executable') and sys.executable and Path(sys.executable).exists():
+                        exe_path_wide = ctypes.create_unicode_buffer(sys.executable)
+                        hicon_small = ctypes.windll.user32.LoadImageW(
+                            0, exe_path_wide, IMAGE_ICON, 16, 16, LR_LOADFROMFILE | LR_DEFAULTSIZE
+                        )
+                        hicon_large = ctypes.windll.user32.LoadImageW(
+                            0, exe_path_wide, IMAGE_ICON, 32, 32, LR_LOADFROMFILE | LR_DEFAULTSIZE
+                        )
+                        if hicon_small or hicon_large:
+                            icon_path = sys.executable
+                
+                # Set icons
+                if hicon_small or hicon_large:
+                    WM_SETICON = 0x0080
+                    ICON_SMALL = 0
+                    ICON_BIG = 1
+                    
+                    if hicon_small:
+                        ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_SMALL, hicon_small)
+                    if hicon_large:
+                        ctypes.windll.user32.SendMessageW(hwnd, WM_SETICON, ICON_BIG, hicon_large)
             except Exception:
                 pass
         
@@ -277,8 +277,8 @@ def set_window_icon(root: tk.Tk, icon_path: Optional[str] = None):
             if icon_path and Path(icon_path).exists():
                 try:
                     root.iconbitmap(icon_path)
-        except Exception:
-            pass
+                except Exception:
+                    pass
         
         return icon_path if icon_path else None
     except Exception:
