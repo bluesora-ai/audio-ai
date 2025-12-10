@@ -509,7 +509,7 @@ class BeatlibraryProvenanceApp:
                     if status == "completed":
                         self.logger.log("✅ Processing completed!", "SUCCESS")
                         self.step2.set_status("✅ Processing Complete")
-                        self.show_alert("Success", "Processing completed!\n\nClick 'Download Report' to view results.", 'success')
+                        # Notification removed - only show notification after upload, not after processing
                         break
                     elif status == "failed":
                         error = status_data.get('error', 'Unknown error')

@@ -439,6 +439,17 @@ class ProvenanceReportBuilder:
             
             audio, sr = sf.read(audio_path)
             
+            # Convert stereo to mono if needed (sf.read can return 2D array for stereo)
+            if audio.ndim > 1:
+                # If stereo (shape: [samples, channels]), convert to mono
+                audio = np.mean(audio, axis=1) if audio.ndim == 2 else audio
+            
+            # Ensure audio is 1D
+            audio = np.squeeze(audio)
+            if audio.ndim != 1:
+                # If still not 1D, flatten it
+                audio = audio.flatten()
+            
             # Compute spectrogram using module-level librosa
             D = librosa_module.stft(audio)
             S_db = librosa_module.amplitude_to_db(np.abs(D), ref=np.max)
@@ -453,8 +464,11 @@ class ProvenanceReportBuilder:
                     # Reshape 1D to 2D if needed
                     S_db = S_db.reshape(-1, 1)
                 elif S_db.ndim > 2:
-                    # Take first slice if 3D+
-                    S_db = S_db[:, :, 0] if S_db.shape[2] == 1 else S_db.reshape(S_db.shape[0], -1)
+                    # Take first slice if 3D+ (shouldn't happen after squeeze, but just in case)
+                    if S_db.shape[-1] == 1:
+                        S_db = S_db[:, :, 0] if S_db.ndim == 3 else S_db.squeeze()
+                    else:
+                        S_db = S_db.reshape(S_db.shape[0], -1)
             
             # Plot
             plt.figure(figsize=(10, 4))
