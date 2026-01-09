@@ -26,3 +26,6 @@ class JobStatus(BaseModel):
     report_path: Optional[str] = None
     error: Optional[str] = None
     created_at: Optional[str] = None
+    current_stage: Optional[str] = None  # segmenting, embedding, building_report
+    progress_percent: Optional[int] = None  # 0-100
+    stage_message: Optional[str] = None  # Human-readable stage message

@@ -127,7 +127,8 @@ class PipelineOrchestrator:
         self,
         input_path: Path,
         output_dir: Optional[Path] = None,
-        stems_to_process: Optional[List[str]] = None
+        stems_to_process: Optional[List[str]] = None,
+        progress_callback: Optional[callable] = None  # type: ignore
     ) -> Dict:
         """
         Process a single audio file through the complete pipeline.
@@ -161,12 +162,16 @@ class PipelineOrchestrator:
         
         # Step 1: Segment audio
         logger.info("Step 1: Segmenting audio...")
+        if progress_callback:
+            progress_callback("segmenting", 10, "Segmenting audio file...")
         seg_start = time.time()
         segments_dir = output_dir / "segments"
         segments = self.segmenter.segment_file(input_path, segments_dir)
         seg_duration = time.time() - seg_start
         self.performance_tracker.record_stage("segmentation", seg_duration)
         logger.info(f"Created {len(segments)} segments")
+        if progress_callback:
+            progress_callback("segmenting", 30, f"Created {len(segments)} segments")
         
         # Get file duration
         import soundfile as sf
@@ -175,6 +180,8 @@ class PipelineOrchestrator:
         
         # Step 2: Process each segment with stem separation
         logger.info("Step 2: Separating stems and generating embeddings...")
+        if progress_callback:
+            progress_callback("embedding", 30, "Starting stem separation and embedding generation...")
         all_segment_metadata = []
         all_embeddings = []
         matches = {}  # segment_id -> list of matches
@@ -184,7 +191,10 @@ class PipelineOrchestrator:
         # Track consecutive matches by source file
         source_match_tracker = {}  # source_file_id -> [list of consecutive segment_ids]
         
-        for seg in segments:
+        total_segments = len(segments)
+        processed_count = 0
+        
+        for seg_idx, seg in enumerate(segments):
             segment_id = seg["segment_id"]
             segment_path = Path(seg["path"])
             
@@ -261,6 +271,13 @@ class PipelineOrchestrator:
                 stem_seg_meta["path"] = str(stem_seg_path)
                 all_segment_metadata.append(stem_seg_meta)
                 all_embeddings.append(emb)
+            
+            # Update progress after processing each segment
+            processed_count += 1
+            if progress_callback:
+                # Progress from 30% to 80% during embedding
+                progress_percent = 30 + int((processed_count / total_segments) * 50)
+                progress_callback("embedding", progress_percent, f"Generating embeddings... ({processed_count}/{total_segments} segments)")
         
         # Calculate consecutive matches for each segment
         # Count how many consecutive segments match the same source
@@ -307,6 +324,12 @@ class PipelineOrchestrator:
         
         # Step 3: Build provenance report
         logger.info("Step 3: Building provenance report...")
+        if progress_callback:
+            progress_callback("building_report", 80, "Building provenance report...")
+        
+        # Update progress as report building progresses
+        if progress_callback:
+            progress_callback("building_report", 90, "Finalizing report...")
         
         # Group segments by original segment_id for report
         report_segments = []
@@ -357,6 +380,10 @@ class PipelineOrchestrator:
                 "augmentation_profile": "default"
             }
         )
+        
+        # Report building complete - set progress to 100%
+        if progress_callback:
+            progress_callback("building_report", 100, "Report building complete!")
         
         # End performance tracking
         self.performance_tracker.end()

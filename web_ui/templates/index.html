@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Beatlibrary - Audio Provenance</title>
+    <link rel="stylesheet" href="/static/css/style.css">
+    <script src="https://cdn.plot.ly/plotly-2.26.0.min.js"></script>
+</head>
+<body>
+    <div class="main-container">
+        <!-- Header -->
+        <div class="header">
+            <h1 class="title">Provenance Report</h1>
+            <div class="progress-indicator">
+                <div class="step-indicator" data-step="1">
+                    <div class="step-circle active">
+                        <span class="step-number">1</span>
+                    </div>
+                    <span class="step-name">Connection & Upload</span>
+                </div>
+                <div class="step-separator"></div>
+                <div class="step-indicator" data-step="2">
+                    <div class="step-circle">
+                        <span class="step-number">2</span>
+                    </div>
+                    <span class="step-name">Processing</span>
+                </div>
+                <div class="step-separator"></div>
+                <div class="step-indicator" data-step="3">
+                    <div class="step-circle">
+                        <span class="step-number">3</span>
+                    </div>
+                    <span class="step-name">Report</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step Container -->
+        <div class="step-container">
+            <!-- Step 1: Upload -->
+            <div class="step-content active" id="step1">
+                <div class="card">
+                    <div class="card-inner">
+                        <!-- API Connection Section -->
+                        <div class="section">
+                            <h2 class="section-title">API Connection</h2>
+                            <div class="api-connection">
+                                <label>API URL:</label>
+                                <input type="text" id="apiUrl" class="input-field" value="http://148.251.88.48:8000">
+                                <button class="btn btn-primary" onclick="testConnection()">Test Connection</button>
+                            </div>
+                        </div>
+
+                        <!-- Upload Section -->
+                        <div class="section">
+                            <h2 class="section-title">Upload Audio File</h2>
+                            <div class="upload-area" id="uploadArea" onclick="triggerFileInput()">
+                                <div class="upload-content">
+                                    <div class="upload-icon">☁</div>
+                                    <div class="upload-text-bold">Drag & drop your audio file here</div>
+                                    <div class="upload-text">or click to browse</div>
+                                </div>
+                            </div>
+                            <input type="file" id="fileInput" accept="audio/*" style="display: none;" onchange="handleFileSelect(event)">
+                        </div>
+
+                        <!-- File Info Display -->
+                        <div class="file-info" id="fileInfo" style="display: none;">
+                            <div class="file-display">
+                                <span class="file-name" id="fileName"></span>
+                                <input type="text" class="file-path" id="filePath" readonly>
+                                <button class="remove-btn" onclick="removeFile()">×</button>
+                            </div>
+                        </div>
+
+                        <!-- Upload Progress -->
+                        <div class="upload-progress" id="uploadProgress" style="display: none;">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="progressFill"></div>
+                            </div>
+                            <div class="progress-label" id="progressLabel"></div>
+                        </div>
+
+                        <!-- Upload Button -->
+                        <button class="btn btn-primary btn-upload" id="uploadBtn" onclick="uploadFile()" disabled>
+                            Upload & Process Track
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 2: Processing -->
+            <div class="step-content" id="step2">
+                <div class="card">
+                    <div class="card-inner">
+                        <h2 class="section-title">Processing Status</h2>
+                        <div class="status-display">
+                            <div class="status-text" id="statusText">Ready to process</div>
+                        </div>
+                        <div class="progress-section">
+                            <div class="progress-bar">
+                                <div class="progress-fill" id="processingProgressFill"></div>
+                            </div>
+                            <div class="progress-label" id="processingProgressLabel"></div>
+                        </div>
+                        <div class="job-id">
+                            <span>Job ID:</span>
+                            <span class="job-id-value" id="jobIdValue"></span>
+                        </div>
+                        <div class="action-buttons">
+                            <button class="btn btn-secondary" onclick="checkStatus()">Check Status</button>
+                            <button class="btn btn-primary" onclick="downloadReport()">Download Report</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step 3: Report -->
+            <div class="step-content" id="step3">
+                <div class="card">
+                    <div class="card-inner">
+                        <h2 class="section-title">Provenance Report</h2>
+                        <div class="tabs">
+                            <button class="tab-btn active" onclick="switchTab('summary')">  Summary  </button>
+                            <button class="tab-btn" onclick="switchTab('full')">  Full Report  </button>
+                            <button class="tab-btn" onclick="switchTab('visualizations')">  📊 Visualizations  </button>
+                            <button class="tab-btn" onclick="switchTab('logs')">  Processing Logs  </button>
+                        </div>
+
+                        <!-- Summary Tab -->
+                        <div class="tab-content active" id="tabSummary">
+                            <div class="summary-container">
+                                <div class="summary-column" id="summaryLeft"></div>
+                                <div class="summary-column" id="summaryRight"></div>
+                            </div>
+                        </div>
+
+                        <!-- Full Report Tab -->
+                        <div class="tab-content" id="tabFull">
+                            <pre class="json-display" id="fullReport"></pre>
+                        </div>
+
+                        <!-- Visualizations Tab -->
+                        <div class="tab-content" id="tabVisualizations">
+                            <div class="viz-container" id="vizContainer"></div>
+                        </div>
+
+                        <!-- Logs Tab -->
+                        <div class="tab-content" id="tabLogs">
+                            <pre class="log-display" id="logDisplay"></pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="navigation">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousStep()" disabled>← Previous</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextStep()" disabled>Next →</button>
+        </div>
+    </div>
+
+    <!-- Alert Dialog -->
+    <div class="modal-overlay" id="alertOverlay" style="display: none;">
+        <div class="modal-dialog">
+            <div class="modal-header">
+                <span class="modal-icon" id="alertIcon">ℹ</span>
+                <h3 class="modal-title" id="alertTitle">Alert</h3>
+            </div>
+            <div class="modal-content">
+                <div class="modal-message" id="alertMessage"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="closeAlert()">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/js/app.js"></script>
+</body>
+</html>

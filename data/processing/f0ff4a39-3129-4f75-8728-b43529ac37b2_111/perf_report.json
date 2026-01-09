@@ -1,0 +1,45 @@
+{
+  "timestamp": "2026-01-09T19:03:04.249494",
+  "performance": {
+    "total_time_sec": 42.1362886428833,
+    "stages": {
+      "segmentation": 0.05361604690551758
+    },
+    "embedding": {
+      "count": 296,
+      "total_time_sec": 28.913105010986328,
+      "avg_time_ms": 97.67940882089977,
+      "min_time_ms": 67.48366355895996,
+      "max_time_ms": 796.6098785400391,
+      "throughput_emb_per_sec": 10.237572197366097
+    },
+    "search": {
+      "count": 296,
+      "avg_time_ms": 0.10700080845807049,
+      "min_time_ms": 0.0,
+      "max_time_ms": 15.61880111694336
+    },
+    "classification": {
+      "count": 296,
+      "avg_time_ms": 0.003373300707018053
+    },
+    "system": {
+      "memory_mb": 2074.5234375,
+      "cpu_percent": 0.0
+    }
+  },
+  "targets": {
+    "latency_sec": 1.0,
+    "throughput_emb_per_sec": 10.0,
+    "embedding_time_ms": 50.0
+  },
+  "compliance": {
+    "meets_latency": false,
+    "meets_throughput": true,
+    "meets_embedding_time": false
+  },
+  "environment": {
+    "cpu_count": 20,
+    "memory_total_gb": 63.78655242919922
+  }
+}

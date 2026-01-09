@@ -1,6 +1,8 @@
 """FastAPI server for provenance checking API."""
-from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks
-from fastapi.responses import JSONResponse, FileResponse
+from fastapi import FastAPI, File, UploadFile, HTTPException, BackgroundTasks, Request
+from fastapi.responses import JSONResponse, FileResponse, HTMLResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 from typing import Optional, List, Dict
@@ -8,6 +10,7 @@ import logging
 from pathlib import Path
 import uuid
 import json
+import traceback
 
 from api.models import ProvenanceRequest, ProvenanceResponse, JobStatus
 from src.pipeline.rochestrator import PipelineOrchestrator
@@ -41,6 +44,18 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Web UI templates and static files
+# Use absolute paths to ensure files are found
+base_dir = Path(__file__).parent.parent
+templates_dir = base_dir / "web_ui" / "templates"
+static_dir = base_dir / "web_ui" / "static"
+
+logger.info(f"Templates directory: {templates_dir} (exists: {templates_dir.exists()})")
+logger.info(f"Static directory: {static_dir} (exists: {static_dir.exists()})")
+
+templates = Jinja2Templates(directory=str(templates_dir))
+app.mount("/static", StaticFiles(directory=str(static_dir)), name="static")
 
 # Global state
 jobs: Dict[str, Dict] = {}
@@ -101,6 +116,18 @@ else:
     logger.info(f"   Index hash: {index_hash}")
 
 
+@app.get("/", response_class=HTMLResponse)
+async def root(request: Request):
+    """Serve the main web UI."""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
+@app.get("/api", response_class=HTMLResponse)
+async def api_root(request: Request):
+    """API info endpoint - redirect to web UI."""
+    return templates.TemplateResponse("index.html", {"request": request})
+
+
 @app.post("/api/v1/provenance-check", response_model=ProvenanceResponse)
 async def provenance_check(
     background_tasks: BackgroundTasks,
@@ -121,30 +148,63 @@ async def provenance_check(
     file_path = upload_dir / f"{job_id}_{file.filename}"
     
     try:
+        logger.info(f"📤 Receiving upload for job {job_id}")
+        logger.info(f"   Filename: {file.filename}")
+        logger.info(f"   Content type: {file.content_type}")
+        logger.info(f"   Upload directory: {upload_dir}")
+        logger.info(f"   Target path: {file_path}")
+        
+        # Ensure upload directory exists
+        upload_dir.mkdir(parents=True, exist_ok=True)
+        logger.info(f"   Upload directory exists: {upload_dir.exists()}")
+        
+        # Read and save file
+        logger.info(f"   Reading file content...")
+        content = await file.read()
+        logger.info(f"   Read {len(content)} bytes")
+        
+        logger.info(f"   Writing to {file_path}...")
         with open(file_path, "wb") as f:
-            content = await file.read()
             f.write(content)
+        
+        file_size = file_path.stat().st_size
+        logger.info(f"✅ File saved: {file_path} ({file_size} bytes)")
+        logger.info(f"   File exists: {file_path.exists()}")
         
         # Initialize job
         from datetime import datetime
         jobs[job_id] = {
             "status": "processing",
             "file_path": str(file_path),
-            "created_at": datetime.utcnow().isoformat()
+            "created_at": datetime.utcnow().isoformat(),
+            "current_stage": "uploading",
+            "progress_percent": 0,
+            "stage_message": "File uploaded, starting processing..."
         }
+        logger.info(f"   Job initialized: {jobs[job_id]}")
         
         # Process in background
+        logger.info(f"🔄 Adding background task for job {job_id}")
+        logger.info(f"   Background task will process: {file_path}")
+        
+        # Use background_tasks to process asynchronously
         background_tasks.add_task(process_provenance, job_id, file_path)
         
-        return ProvenanceResponse(
+        logger.info(f"✅ Background task added successfully for job {job_id}")
+        
+        response = ProvenanceResponse(
             job_id=job_id,
             status="processing",
             message="Provenance check started"
         )
+        logger.info(f"📤 Returning response: {response}")
+        return response
     
     except Exception as e:
-        logger.error(f"Error uploading file: {e}")
-        raise HTTPException(status_code=500, detail=str(e))
+        error_trace = traceback.format_exc()
+        logger.error(f"❌ Error uploading file: {e}")
+        logger.error(f"   Traceback: {error_trace}")
+        raise HTTPException(status_code=500, detail=f"Upload error: {str(e)}")
 
 
 @app.get("/api/v1/status/{job_id}", response_model=JobStatus)
@@ -171,51 +231,104 @@ async def get_report(job_id: str):
     if not report_path.exists():
         raise HTTPException(status_code=404, detail="Report not found")
     
-    return FileResponse(
-        report_path,
-        media_type="application/json",
-        filename=f"provenance_report_{job_id}.json"
-    )
+    # Return JSON directly for web UI
+    with open(report_path, 'r') as f:
+        report_data = json.load(f)
+    return JSONResponse(content=report_data)
 
 
-async def process_provenance(job_id: str, file_path: Path):
+def process_provenance(job_id: str, file_path: Path):
     """Background task to process provenance check."""
     try:
-        logger.info(f"Processing provenance for job {job_id}")
+        logger.info(f"🚀 Starting background processing for job {job_id}")
+        logger.info(f"   File path: {file_path}")
+        logger.info(f"   File path type: {type(file_path)}")
+        logger.info(f"   File path exists: {file_path.exists()}")
         
-        # Run pipeline
-        report = orchestrator.process_file(file_path)
+        # Convert to Path if it's a string
+        if isinstance(file_path, str):
+            file_path = Path(file_path)
+            logger.info(f"   Converted string to Path: {file_path}")
+        
+        if not file_path.exists():
+            error_msg = f"Uploaded file not found: {file_path}"
+            logger.error(f"❌ {error_msg}")
+            logger.error(f"   Current working directory: {Path.cwd()}")
+            logger.error(f"   Absolute path: {file_path.absolute()}")
+            raise FileNotFoundError(error_msg)
+        
+        logger.info(f"   File size: {file_path.stat().st_size} bytes")
+        
+        # Run pipeline with progress tracking
+        logger.info(f"🔄 Starting pipeline processing for {file_path.name}")
+        logger.info(f"   Orchestrator initialized: {orchestrator is not None}")
+        
+        # Create a progress callback function
+        def update_progress(stage: str, percent: int, message: str):
+            if job_id in jobs:
+                jobs[job_id]["current_stage"] = stage
+                jobs[job_id]["progress_percent"] = percent
+                jobs[job_id]["stage_message"] = message
+                logger.info(f"📊 Progress update for job {job_id}: {stage} ({percent}%) - {message}")
+        
+        # Process with progress callback
+        report = orchestrator.process_file(file_path, progress_callback=update_progress)
+        
+        # Update progress to 100% when complete
+        if job_id in jobs:
+            jobs[job_id]["current_stage"] = "completed"
+            jobs[job_id]["progress_percent"] = 100
+            jobs[job_id]["stage_message"] = "Processing complete!"
+        logger.info(f"✅ Pipeline processing completed for job {job_id}")
+        logger.info(f"   Report keys: {list(report.keys()) if isinstance(report, dict) else 'Not a dict'}")
         
         # Save report
         report_dir = Path("data/reports")
         report_dir.mkdir(parents=True, exist_ok=True)
         report_path = report_dir / f"report_{job_id}.json"
         
+        logger.info(f"💾 Saving report to {report_path}")
         with open(report_path, 'w') as f:
             json.dump(report, f, indent=2)
         
-        # Update job status
-        jobs[job_id]["status"] = "completed"
-        jobs[job_id]["report_path"] = str(report_path)
+        logger.info(f"   Report saved: {report_path.exists()}")
         
-        logger.info(f"Completed provenance check for job {job_id}")
+        # Update job status
+        if job_id in jobs:
+            jobs[job_id]["status"] = "completed"
+            jobs[job_id]["report_path"] = str(report_path)
+            jobs[job_id]["current_stage"] = "completed"
+            jobs[job_id]["progress_percent"] = 100
+            jobs[job_id]["stage_message"] = "Processing complete!"
+            logger.info(f"✅ Job status updated to completed")
+        else:
+            logger.warning(f"⚠️ Job {job_id} not found in jobs dict")
+        
+        logger.info(f"✅ Completed provenance check for job {job_id}")
+        logger.info(f"   Report saved to: {report_path}")
     
     except Exception as e:
-        logger.error(f"Error processing job {job_id}: {e}")
-        jobs[job_id]["status"] = "failed"
-        jobs[job_id]["error"] = str(e)
-
-
-@app.get("/")
-async def root():
-    """Root endpoint."""
-    return {"message": "Audio Provenance API v2.0", "status": "running"}
+        error_trace = traceback.format_exc()
+        logger.error(f"❌ Error processing job {job_id}: {e}")
+        logger.error(f"   Error type: {type(e).__name__}")
+        logger.error(f"   Traceback: {error_trace}")
+        
+        if job_id in jobs:
+            jobs[job_id]["status"] = "failed"
+            jobs[job_id]["error"] = str(e)
+            jobs[job_id]["error_trace"] = error_trace
+        else:
+            logger.error(f"❌ Cannot update job status - job {job_id} not found in jobs dict")
 
 
 @app.get("/health")
 async def health():
     """Health check endpoint."""
-    return {"status": "healthy"}
+    return {
+        "status": "healthy",
+        "orchestrator_initialized": orchestrator is not None,
+        "jobs_count": len(jobs)
+    }
 
 
 @app.get("/api/v1/index-status")

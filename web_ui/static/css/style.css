@@ -1,0 +1,569 @@
+/* Exact color scheme from GUI constants */
+:root {
+    --bg-dark: #000000;
+    --bg-card: #1A1A1A;
+    --bg-hover: #2A2A2A;
+    --text-primary: #FFFFFF;
+    --text-secondary: #B0B0B0;
+    --accent: #6366F1;
+    --accent-hover: #818CF8;
+    --success: #10B981;
+    --warning: #F59E0B;
+    --error: #EF4444;
+    --border: #333333;
+    --input-bg: #0F0F0F;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, sans-serif;
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+.main-container {
+    min-height: 100vh;
+    padding: 30px 40px;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Header */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+.title {
+    font-size: 24px;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.progress-indicator {
+    display: flex;
+    align-items: center;
+    gap: 0;
+}
+
+.step-indicator {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.step-circle {
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: var(--bg-card);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+
+.step-circle.active {
+    background-color: var(--accent);
+}
+
+.step-number {
+    font-size: 11px;
+    font-weight: bold;
+    color: var(--text-secondary);
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.step-circle.active .step-number {
+    color: var(--text-primary);
+}
+
+.step-name {
+    font-size: 10px;
+    color: var(--text-secondary);
+}
+
+.step-indicator.active .step-name {
+    color: var(--accent-hover);
+}
+
+.step-separator {
+    width: 2px;
+    height: 12px;
+    background-color: var(--accent);
+    margin: 0 15px;
+}
+
+/* Step Container */
+.step-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.step-content {
+    display: none;
+    flex: 1;
+    min-height: 0;
+}
+
+.step-content.active {
+    display: flex;
+    flex-direction: column;
+}
+
+/* Card */
+.card {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 0;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+.card-inner {
+    padding: 40px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+}
+
+/* Section */
+.section {
+    margin-bottom: 20px;
+}
+
+.section-title {
+    font-size: 16px;
+    font-weight: bold;
+    color: var(--text-primary);
+    margin-bottom: 12px;
+}
+
+/* API Connection */
+.api-connection {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.api-connection label {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+.input-field {
+    flex: 1;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border);
+    color: var(--text-primary);
+    font-size: 11px;
+    padding: 10px;
+    font-family: 'Segoe UI', sans-serif;
+    outline: none;
+}
+
+.input-field:focus {
+    border-color: var(--accent);
+}
+
+/* Upload Area */
+.upload-area {
+    border: 2px dashed #666666;
+    padding: 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color 0.2s;
+}
+
+.upload-area:hover {
+    border-color: var(--accent);
+    cursor: pointer;
+}
+
+.upload-content {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+}
+
+.upload-icon {
+    font-size: 36px;
+    margin-bottom: 8px;
+}
+
+.upload-text-bold {
+    font-size: 13px;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.upload-text {
+    font-size: 11px;
+    color: var(--text-secondary);
+}
+
+/* File Info */
+.file-info {
+    margin: 12px 0;
+}
+
+.file-display {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.file-name {
+    font-size: 11px;
+    color: var(--text-primary);
+    white-space: nowrap;
+}
+
+.file-path {
+    flex: 1;
+    background-color: var(--input-bg);
+    border: 1px solid var(--border);
+    color: var(--text-secondary);
+    font-size: 10px;
+    padding: 6px;
+    font-family: 'Segoe UI', sans-serif;
+    outline: none;
+}
+
+.remove-btn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    padding: 2px 8px;
+    transition: color 0.2s;
+}
+
+.remove-btn:hover {
+    color: var(--error);
+    background-color: var(--bg-card);
+}
+
+/* Progress Bar */
+.upload-progress {
+    margin: 12px 0;
+    display: none;
+}
+
+.progress-section {
+    margin: 12px 0;
+}
+
+.progress-bar {
+    width: 100%;
+    height: 20px;
+    background-color: var(--bg-card);
+    border-radius: 0;
+    overflow: hidden;
+    position: relative;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--accent);
+    width: 0%;
+    transition: width 0.3s;
+}
+
+.progress-label {
+    font-size: 9px;
+    color: var(--text-secondary);
+    margin-top: 5px;
+}
+
+/* Buttons */
+.btn {
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 10px;
+    font-weight: bold;
+    padding: 12px 25px;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    outline: none;
+}
+
+.btn-primary {
+    background-color: var(--accent);
+    color: var(--text-primary);
+}
+
+.btn-primary:hover:not(:disabled) {
+    background-color: var(--accent-hover);
+}
+
+.btn-secondary {
+    background-color: var(--bg-card);
+    color: var(--text-primary);
+}
+
+.btn-secondary:hover:not(:disabled) {
+    background-color: var(--bg-hover);
+}
+
+.btn:disabled {
+    background-color: var(--bg-card);
+    color: var(--text-secondary);
+    cursor: not-allowed;
+}
+
+.btn-upload {
+    margin-top: 0;
+}
+
+/* Status Display */
+.status-display {
+    margin-bottom: 15px;
+}
+
+.status-text {
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.job-id {
+    margin: 25px 0;
+    font-size: 11px;
+}
+
+.job-id span:first-child {
+    color: var(--text-secondary);
+    margin-right: 8px;
+}
+
+.job-id-value {
+    color: var(--accent);
+    font-family: 'Consolas', monospace;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 12px;
+}
+
+/* Tabs */
+.tabs {
+    display: flex;
+    gap: 0;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 20px;
+}
+
+.tab-btn {
+    background: none;
+    border: none;
+    padding: 10px 20px;
+    font-size: 10px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    transition: all 0.2s;
+    font-family: 'Segoe UI', sans-serif;
+    outline: none;
+}
+
+.tab-btn.active {
+    background-color: var(--accent);
+    color: var(--text-primary);
+    border-bottom-color: var(--accent);
+}
+
+.tab-content {
+    display: none !important;
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+}
+
+.tab-content.active {
+    display: flex !important;
+    flex-direction: column;
+}
+
+/* Summary */
+.summary-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    padding: 25px;
+    flex: 1;
+    min-height: 0;
+}
+
+.summary-column {
+    background-color: var(--bg-dark);
+    padding: 15px;
+    font-size: 11px;
+    color: var(--text-secondary);
+    line-height: 1.6;
+    overflow-y: auto;
+}
+
+.summary-column .section-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--accent);
+    margin-bottom: 10px;
+}
+
+/* JSON Display */
+.json-display {
+    background-color: var(--bg-dark);
+    color: var(--text-secondary);
+    font-family: 'Consolas', monospace;
+    font-size: 10px;
+    padding: 25px;
+    overflow: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    flex: 1;
+    margin: 0;
+}
+
+/* Visualizations */
+.viz-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    padding: 20px;
+    background-color: var(--bg-dark);
+    overflow-y: auto;
+    flex: 1;
+    min-height: 500px;
+}
+
+.viz-chart {
+    background-color: var(--bg-secondary);
+    padding: 15px;
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    min-height: 300px;
+    width: 100%;
+}
+
+/* Logs */
+.log-display {
+    background-color: var(--bg-dark);
+    color: var(--text-secondary);
+    font-family: 'Consolas', monospace;
+    font-size: 10px;
+    padding: 25px;
+    overflow: auto;
+    white-space: pre-wrap;
+    flex: 1;
+    margin: 0;
+}
+
+/* Navigation */
+.navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    height: 60px;
+    align-items: center;
+}
+
+/* Modal/Dialog */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal-dialog {
+    background-color: var(--bg-dark);
+    width: 450px;
+    max-width: 90%;
+    border: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+}
+
+.modal-header {
+    background-color: var(--bg-card);
+    padding: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    height: 50px;
+}
+
+.modal-icon {
+    font-size: 20px;
+    font-weight: bold;
+}
+
+.modal-title {
+    font-size: 14px;
+    font-weight: bold;
+    color: var(--text-primary);
+}
+
+.modal-content {
+    padding: 25px;
+    flex: 1;
+}
+
+.modal-message {
+    font-size: 11px;
+    color: var(--text-primary);
+    white-space: pre-wrap;
+    font-family: 'Segoe UI', sans-serif;
+}
+
+.modal-footer {
+    padding: 0 25px 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+::-webkit-scrollbar-track {
+    background: var(--bg-dark);
+}
+
+::-webkit-scrollbar-thumb {
+    background: var(--border);
+    border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: var(--text-secondary);
+}
